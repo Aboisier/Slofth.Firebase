@@ -55,5 +55,11 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Firebase.Net\Firebase.Net.csproj">
+      <Project>{d998035e-f065-41a7-8cb7-fba4217afca7}</Project>
+      <Name>Firebase.Net</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
