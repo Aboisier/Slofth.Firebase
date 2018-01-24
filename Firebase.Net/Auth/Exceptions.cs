@@ -10,6 +10,8 @@ namespace Firebase.Net.Auth
 
     public class InvalidGrantTypeException : Exception { }
 
+    public class MissingRefreshTokenException : Exception { }
+
     public class EmailExistsException : Exception { }
 
     public class OperationNotAllowedException : Exception { }
