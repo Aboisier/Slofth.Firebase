@@ -180,5 +180,21 @@ namespace Firebase.Net.Auth
                 throw new FirebaseAuthException();
             }
         }
+
+        public async Task ConfirmEmailVerification(string code)
+        {
+            string url = Endpoints.SetAccountInfo + EndpointKeySuffix;
+            var body = new { oobCode = code };
+            var response = await Client.PostAsJsonAsync(url, body);
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsAsync<Error>();
+                if (error != null)
+                    throw error.GetCorrespondingException();
+
+                throw new FirebaseAuthException();
+            }
+        }
+
     }
 }
