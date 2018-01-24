@@ -35,4 +35,6 @@ namespace Firebase.Net.Auth
     public class TokenExpiredException : Exception { }
 
     public class FederateUserIdAlreadyLinkedException : Exception { }
+
+    public class FirebaseAuthException : Exception { }
 }
