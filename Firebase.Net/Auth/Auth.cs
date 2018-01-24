@@ -166,6 +166,19 @@ namespace Firebase.Net.Auth
             }
         }
 
+        public async Task SendEmailVerificationEmail(string idToken)
+        {
+            string url = Endpoints.SendConfirmationEmail + EndpointKeySuffix;
+            var body = new { requestType = RequestTypes.VerifyEmail, idToken };
+            var response = await Client.PostAsJsonAsync(url, body);
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsAsync<Error>();
+                if (error != null)
+                    throw error.GetCorrespondingException();
 
+                throw new FirebaseAuthException();
+            }
+        }
     }
 }
