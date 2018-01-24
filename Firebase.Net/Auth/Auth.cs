@@ -226,5 +226,19 @@ namespace Firebase.Net.Auth
             }
         }
 
+        public async Task DeleteAccount(string idToken)
+        {
+            string url = Endpoints.DeleteAccount + EndpointKeySuffix;
+            var body = new { idToken };
+            var response = await Client.PostAsJsonAsync(url, body);
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsAsync<Error>();
+                if (error != null)
+                    throw error.GetCorrespondingException();
+
+                throw new FirebaseAuthException();
+            }
+        }
     }
 }
