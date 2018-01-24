@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace Firebase.Net.Auth
 {
+    public class InvalidRefreshTokenException : Exception { }
+
     public class EmailExistsException : Exception { }
 
     public class OperationNotAllowedException : Exception { }

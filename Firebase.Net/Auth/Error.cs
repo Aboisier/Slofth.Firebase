@@ -6,6 +6,7 @@ namespace Firebase.Net.Auth
     {
         private static class Messages
         {
+            public static readonly string InvalidRefreshToken = "INVALID_REFRESH_TOKEN";
             public static readonly string EmailExists = "EMAIL_EXISTS";
             public static readonly string OperationNotAllowed = "OPERATION_NOT_ALLOWED";
             public static readonly string TooManyAttempts = "TOO_MANY_ATTEMPTS_TRY_LATER";
@@ -28,6 +29,9 @@ namespace Firebase.Net.Auth
 
         public Exception GetCorrespondingException()
         {
+            if (message == Messages.InvalidRefreshToken)
+                return new InvalidRefreshTokenException();
+
             if (message == Messages.EmailExists)
                 return new EmailExistsException();
 
