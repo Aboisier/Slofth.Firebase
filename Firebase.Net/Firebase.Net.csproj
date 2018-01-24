@@ -52,6 +52,7 @@
     <Compile Include="Auth\AccountInfo.cs" />
     <Compile Include="Auth\Auth.cs" />
     <Compile Include="Auth\Error.cs" />
+    <Compile Include="Auth\Exceptions.cs" />
     <Compile Include="Auth\SignInInfo.cs" />
     <Compile Include="Auth\User.cs" />
     <Compile Include="Auth\UserInfo.cs" />
