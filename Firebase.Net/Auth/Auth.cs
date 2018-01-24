@@ -40,7 +40,7 @@ namespace Firebase.Net.Auth
 
         private async Task<AccountInfo> GetAccountInfo(string idToken)
         {
-            string url = Endpoints.AccountInfo + EndpointKeySuffix;
+            string url = Endpoints.GetAccountInfo + EndpointKeySuffix;
             var body = new { idToken };
             var response = await Client.PostAsJsonAsync(url, body);
             if (!response.IsSuccessStatusCode)
@@ -138,7 +138,7 @@ namespace Firebase.Net.Auth
 
         public async Task<bool> VerifyPasswordResetCorde(string code)
         {
-            string url = Endpoints.PasswordReset + EndpointKeySuffix;
+            string url = Endpoints.ResetPassword + EndpointKeySuffix;
             var body = new { oobCode = code };
             var response = await Client.PostAsJsonAsync(url, body);
             if (!response.IsSuccessStatusCode)
@@ -154,7 +154,7 @@ namespace Firebase.Net.Auth
 
         public async Task<bool> ConfirmPasswordReset(string code, string newPassword)
         {
-            string url = Endpoints.PasswordReset + EndpointKeySuffix;
+            string url = Endpoints.ResetPassword + EndpointKeySuffix;
             var body = new { oobCode = code, newPassword };
             var response = await Client.PostAsJsonAsync(url, body);
             if (!response.IsSuccessStatusCode)
