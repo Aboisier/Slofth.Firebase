@@ -136,7 +136,7 @@ namespace Firebase.Net.Auth
             return true;
         }
 
-        public async Task<bool> VerifyPasswordResetCorde(string code)
+        public async Task<bool> VerifyPasswordResetCode(string code)
         {
             string url = Endpoints.ResetPassword + EndpointKeySuffix;
             var body = new { oobCode = code };
