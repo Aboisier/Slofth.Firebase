@@ -9,11 +9,16 @@ namespace Firebase.Net.Auth
         private static class Endpoints
         {
             public static readonly string ApiBase = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/";
-            public static readonly string AccountInfo = "getAccountInfo";
+            public static readonly string GetAccountInfo = "getAccountInfo";
+            public static readonly string SetAccountInfo = "setAccountInfo";
             public static readonly string SignUp = "signupNewUser";
             public static readonly string SignIn = "verifyPassword";
             public static readonly string SendConfirmationEmail = "getOobConfirmationCode";
-            public static readonly string PasswordReset = "resetPassword";
+            public static readonly string ResetPassword = "resetPassword";
+            public static readonly string DeleteAccount = "deleteAccount";
+            public static readonly string VerifyAssertion = "verifyAssertion";
+            public static readonly string CreateAuthUri = "ceateAuthUri";
+            public static readonly string VerifyCustomToken = "verifyCustomToken";
         }
 
         private static class RequestTypes
