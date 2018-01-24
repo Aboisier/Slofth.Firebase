@@ -196,5 +196,20 @@ namespace Firebase.Net.Auth
             }
         }
 
+        public async Task ChangeEmail(string idToken, string newEmail)
+        {
+            string url = Endpoints.SetAccountInfo + EndpointKeySuffix;
+            var body = new { idToken, email = newEmail, returnSecureToken = true };
+            var response = await Client.PostAsJsonAsync(url, body);
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsAsync<Error>();
+                if (error != null)
+                    throw error.GetCorrespondingException();
+
+                throw new FirebaseAuthException();
+            }
+        }
+
     }
 }
