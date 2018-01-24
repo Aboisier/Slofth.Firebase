@@ -120,10 +120,10 @@ namespace Firebase.Net.Auth
             return user;
         }
 
-        public async Task<bool> SendPasswordResetEmail(User user)
+        public async Task SendPasswordResetEmail(string email)
         {
             string url = Endpoints.SendConfirmationEmail + EndpointKeySuffix;
-            var body = new { requestType = RequestTypes.PasswordReset, email = user.Email };
+            var body = new { requestType = RequestTypes.PasswordReset, email };
             var response = await Client.PostAsJsonAsync(url, body);
             if (!response.IsSuccessStatusCode)
             {
@@ -133,7 +133,6 @@ namespace Firebase.Net.Auth
 
                 throw new FirebaseAuthException();
             }
-            return true;
         }
 
         public async Task<bool> VerifyPasswordResetCode(string code)
@@ -152,7 +151,7 @@ namespace Firebase.Net.Auth
             return true;
         }
 
-        public async Task<bool> ConfirmPasswordReset(string code, string newPassword)
+        public async Task ConfirmPasswordReset(string code, string newPassword)
         {
             string url = Endpoints.ResetPassword + EndpointKeySuffix;
             var body = new { oobCode = code, newPassword };
@@ -165,7 +164,6 @@ namespace Firebase.Net.Auth
 
                 throw new FirebaseAuthException();
             }
-            return true;
         }
 
 
