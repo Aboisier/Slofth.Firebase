@@ -211,5 +211,20 @@ namespace Firebase.Net.Auth
             }
         }
 
+        public async Task ChangePassword(string idToken, string newPassword)
+        {
+            string url = Endpoints.SetAccountInfo + EndpointKeySuffix;
+            var body = new { idToken, password = newPassword, returnSecureToken = true };
+            var response = await Client.PostAsJsonAsync(url, body);
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsAsync<Error>();
+                if (error != null)
+                    throw error.GetCorrespondingException();
+
+                throw new FirebaseAuthException();
+            }
+        }
+
     }
 }
