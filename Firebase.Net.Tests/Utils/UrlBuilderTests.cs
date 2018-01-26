@@ -63,5 +63,23 @@ namespace Firebase.Net.Tests.Extensions
             // Assert
             Assert.AreEqual("/foo/bar/lel", builder.Path);
         }
+
+        [Test]
+        public void Copy_ShouldProduceSameUrl()
+        {
+            // Arrange
+            var baseUrl = "https://www.example.com";
+            var originalBuilder = UrlBuilder.Create(baseUrl)
+                                            .AppendToPath("foo/")
+                                            .AppendToPath("/bar///")
+                                            .AppendToPath("lel");
+
+            // Act
+            var copyBuilder = originalBuilder.Copy();
+
+            // Assert
+            Assert.AreEqual(originalBuilder.Url, copyBuilder.Url);
+
+        }
     }
 }

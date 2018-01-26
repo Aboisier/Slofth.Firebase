@@ -9,6 +9,7 @@ namespace Firebase.Net.Utils
         public string Query => Builder.Query;
         public string Path => Builder.Path;
         public string Fragment => Builder.Fragment;
+        public string Url => Builder.ToString();
 
         private UriBuilder Builder { get; set; }
 
@@ -48,6 +49,11 @@ namespace Firebase.Net.Utils
             path = Regex.Replace(path, "\\/+$", "");
             Builder.Path = path;
             return this;
+        }
+
+        public UrlBuilder Copy()
+        {
+            return new UrlBuilder(Builder.Uri.ToString());
         }
 
         public override string ToString()
