@@ -55,7 +55,7 @@ namespace PolyPaint.Tests.Services
             return File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData\\" + filePath));
         }
 
-        public async void ImportDatabase(string filePath)
+        public async Task ImportDatabase(string filePath)
         {
             var data = ReadFile("Database\\" + filePath);
             await DatabaseHttpClient.PutAsync(Constants.JsonEndpoint + AuthSuffix, new StringContent(data));
