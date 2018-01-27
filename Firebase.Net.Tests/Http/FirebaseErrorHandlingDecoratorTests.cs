@@ -25,7 +25,8 @@ namespace Firebase.Net.Tests.Http
             ContentMock = new Mock<HttpContent>();
             ClientDecorator = new FirebaseErrorHandlingDecorator(BaseClientMock.Object);
 
-            ContentMock.Setup(x => x.ReadAsAsync<Error>()).Returns(() => Task.FromResult(Error));
+            // TODO : We're going to have to somehow wrap the content mock, because we can't mock the ReadAsAsync extension method (because it's an extension method).
+            // ContentMock.Setup(x => x.ReadAsAsync<Error>()).Returns(() => Task.FromResult(Error));
 
             ResponseMock.Setup(x => x.IsSuccessStatusCode).Returns(() => IsSuccessStatusCode);
             ResponseMock.Setup(x => x.Content).Returns(() => ContentMock.Object);
@@ -34,18 +35,6 @@ namespace Firebase.Net.Tests.Http
             BaseClientMock.Setup(x => x.PutAsJsonAsync(It.IsAny<string>(), It.IsAny<object>())).Returns(() => Task.FromResult(ResponseMock.Object));
             BaseClientMock.Setup(x => x.PostAsJsonAsync(It.IsAny<string>(), It.IsAny<object>())).Returns(() => Task.FromResult(ResponseMock.Object));
             BaseClientMock.Setup(x => x.DeleteAsync(It.IsAny<string>())).Returns(() => Task.FromResult(ResponseMock.Object));
-        }
-
-        [Test]
-        public async Task Test()
-        {
-            // Arrange
-
-
-            // Act
-            await ClientDecorator.PostAsJsonAsync(Constants.Url, "my data");
-
-            // Assert
         }
 
         class Constants
