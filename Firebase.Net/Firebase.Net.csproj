@@ -54,7 +54,7 @@
     <Compile Include="Http\Error.cs" />
     <Compile Include="Http\HttpClientDecorator.cs" />
     <Compile Include="Http\HttpClientFactory.cs" />
-    <Compile Include="Http\HttpClientFirebaseErrorsDecorator.cs" />
+    <Compile Include="Http\FirebaseErrorHandlingDecorator.cs" />
     <Compile Include="Http\HttpClientFacade.cs" />
     <Compile Include="Http\IHttpClientFacade.cs" />
   </ItemGroup>

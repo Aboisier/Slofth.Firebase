@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("Firebase.Net.Tests")]
 namespace Firebase.Net.Http
 {
-    public class HttpClientFirebaseErrorsDecorator : HttpClientDecorator
+    class FirebaseErrorHandlingDecorator : HttpClientDecorator
     {
-        public HttpClientFirebaseErrorsDecorator(IHttpClientFacade baseComponent) : base(baseComponent) { }
+        public FirebaseErrorHandlingDecorator(IHttpClientFacade baseComponent) : base(baseComponent) { }
 
         public override async Task<HttpResponseMessage> GetAsync(string url)
         {
