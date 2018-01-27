@@ -2,9 +2,9 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Firebase.Net.Utils
+namespace Firebase.Net.Http
 {
-    class HttpClientFacade
+    class HttpClientFacade : IHttpClientFacade
     {
         private HttpClient Client { get; set; }
 
@@ -39,7 +39,7 @@ namespace Firebase.Net.Utils
             return await Client.GetAsync(url);
         }
 
-        public async Task<HttpResponseMessage> PutAsJsonAsync(string url)
+        public async Task<HttpResponseMessage> DeleteAsync(string url)
         {
             return await Client.DeleteAsync(url);
         }

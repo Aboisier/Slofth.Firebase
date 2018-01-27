@@ -54,6 +54,7 @@
     <Compile Include="Utils\HandledHttpClient.cs" />
     <Compile Include="Utils\HttpClientFacade.cs" />
     <Compile Include="Http\Error.cs" />
+    <Compile Include="Http\HttpClientFacade.cs" />
     <Compile Include="Http\IHttpClientFacade.cs" />
   </ItemGroup>
   <ItemGroup>
