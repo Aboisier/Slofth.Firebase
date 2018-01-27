@@ -37,7 +37,6 @@ namespace Firebase.Net.Http
             if (message == Messages.InvalidGrantType)
                 return new InvalidGrantTypeException();
 
-
             if (message == Messages.MissingRefreshToken)
                 return new MissingRefreshTokenException();
 
@@ -51,7 +50,7 @@ namespace Firebase.Net.Http
                 return new TooManyAttemptsException();
 
             if (message == Messages.EmailNotFound)
-                new EmailNotFoundException();
+                return new EmailNotFoundException();
 
             if (message == Messages.InvalidPassword)
                 return new InvalidPasswordException();
