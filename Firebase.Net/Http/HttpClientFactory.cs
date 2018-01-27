@@ -5,7 +5,7 @@
         public static IHttpClientFacade Create()
         {
             IHttpClientFacade client = new HttpClientFacade();
-            client = new HttpClientFirebaseErrorsDecorator(client);
+            client = new FirebaseErrorHandlingDecorator(client);
             return client;
         }
     }
