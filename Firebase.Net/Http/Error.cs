@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Firebase.Net.Utils
+namespace Firebase.Net.Http
 {
     public class Error
     {
