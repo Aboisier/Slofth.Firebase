@@ -1,18 +1,32 @@
-﻿namespace Firebase.Net.Auth
+﻿using Newtonsoft.Json;
+
+namespace Firebase.Net.Auth
 {
     class AccountInfo
     {
-        public string localId { get; set; }
-        public string email { get; set; }
-        public bool emailVerified { get; set; }
-        public string displayName { get; set; }
-        public string photoUrl { get; set; }
-        public string passwordHash { get; set; }
-        public double passwordUpdatedAt { get; set; }
-        public string validSince { get; set; }
-        public bool disabled { get; set; }
-        public string lastLoginAt { get; set; }
-        public string createdAt { get; set; }
-        public bool customAuth { get; set; }
+        [JsonProperty("localId")]
+        public string LocalId { get; set; }
+        [JsonProperty("email")]
+        public string Email { get; set; }
+        [JsonProperty("emailVerified")]
+        public bool EmailVerified { get; set; }
+        [JsonProperty("displayName")]
+        public string DisplayName { get; set; }
+        [JsonProperty("photoUrl")]
+        public string PhotoUrl { get; set; }
+        [JsonProperty("passwordHash")]
+        public string PasswordHash { get; set; }
+        [JsonProperty("passwordUpdatedAt")]
+        public double PasswordUpdatedAt { get; set; }
+        [JsonProperty("validSince")]
+        public string ValidSince { get; set; }
+        [JsonProperty("disabled")]
+        public bool Disabled { get; set; }
+        [JsonProperty("lastLoginAt")]
+        public string LastLoginAt { get; set; }
+        [JsonProperty("createdAt")]
+        public string CreatedAt { get; set; }
+        [JsonProperty("customAuth")]
+        public bool CustomAuth { get; set; }
     }
 }

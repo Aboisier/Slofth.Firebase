@@ -55,9 +55,9 @@ namespace Firebase.Net.Auth
 
             var signUpInfo = await response.Content.ReadAsAsync<SignInInfo>();
             var accountInfo = await GetAccountInfo(signUpInfo.IdToken);
-            var metadata = new UserMetadata(accountInfo.createdAt, accountInfo.lastLoginAt);
-            var user = new User(accountInfo.displayName, accountInfo.email, accountInfo.emailVerified,
-                                false, metadata, null, accountInfo.photoUrl, null, null,
+            var metadata = new UserMetadata(accountInfo.CreatedAt, accountInfo.LastLoginAt);
+            var user = new User(accountInfo.DisplayName, accountInfo.Email, accountInfo.EmailVerified,
+                                false, metadata, null, accountInfo.PhotoUrl, null, null,
                                 signUpInfo.RefreshToken, signUpInfo.LocalId);
             return user;
         }
@@ -70,9 +70,9 @@ namespace Firebase.Net.Auth
 
             var signInInfo = await response.Content.ReadAsAsync<SignInInfo>();
             var accountInfo = await GetAccountInfo(signInInfo.IdToken);
-            var metadata = new UserMetadata(accountInfo.createdAt, accountInfo.lastLoginAt);
-            var user = new User(accountInfo.displayName, accountInfo.email, accountInfo.emailVerified,
-                                false, metadata, null, accountInfo.photoUrl, null, null,
+            var metadata = new UserMetadata(accountInfo.CreatedAt, accountInfo.LastLoginAt);
+            var user = new User(accountInfo.DisplayName, accountInfo.Email, accountInfo.EmailVerified,
+                                false, metadata, null, accountInfo.PhotoUrl, null, null,
                                 signInInfo.RefreshToken, signInInfo.LocalId);
             return user;
         }
