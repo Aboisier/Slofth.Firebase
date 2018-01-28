@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Firebase.Net.Auth
+namespace Firebase.Net.Http
 {
-    class Error
+    public class Error
     {
         private static class Messages
         {
@@ -50,7 +50,7 @@ namespace Firebase.Net.Auth
                 return new TooManyAttemptsException();
 
             if (message == Messages.EmailNotFound)
-                new EmailNotFoundException();
+                return new EmailNotFoundException();
 
             if (message == Messages.InvalidPassword)
                 return new InvalidPasswordException();
@@ -88,7 +88,7 @@ namespace Firebase.Net.Auth
             if (message == Messages.FederateUserIdAlreadyLinked)
                 return new FederateUserIdAlreadyLinkedException();
 
-            return new FirebaseAuthException();
+            return new FirebaseException();
         }
     }
 }
