@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Firebase.Net.Http;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -24,18 +25,17 @@ namespace Firebase.Net.Auth
         private static class RequestTypes
         {
             public static readonly string PasswordReset = "PASSWORD_RESET";
-            public static readonly string VerifyEmail= "VERIFY_EMAIL";
+            public static readonly string VerifyEmail = "VERIFY_EMAIL";
         }
 
         private string ApiKey { get; set; }
-        private HttpClient Client { get; set; }
+        private IHttpClientFacade Client { get; set; }
         private string EndpointKeySuffix => $"?key={ApiKey}";
 
         public Auth(string apiKey)
         {
             ApiKey = apiKey;
-            Client = new HttpClient();
-            Client.BaseAddress = new Uri(Endpoints.ApiBase);
+            Client = Http.HttpClientFactory.Create(new Uri(Endpoints.ApiBase));
         }
 
         private async Task<AccountInfo> GetAccountInfo(string idToken)
@@ -43,14 +43,7 @@ namespace Firebase.Net.Auth
             string url = Endpoints.GetAccountInfo + EndpointKeySuffix;
             var body = new { idToken };
             var response = await Client.PostAsJsonAsync(url, body);
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsAsync<Error>();
-                if (error != null)
-                    throw error.GetCorrespondingException();
 
-                throw new FirebaseAuthException();
-            }
             return await response.Content.ReadAsAsync<AccountInfo>();
         }
 
@@ -59,14 +52,6 @@ namespace Firebase.Net.Auth
             string url = Endpoints.SignUp + EndpointKeySuffix;
             var body = new { email, password, returnSecureToken = true };
             var response = await Client.PostAsJsonAsync(url, body);
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsAsync<Error>();
-                if (error != null)
-                    throw error.GetCorrespondingException();
-
-                throw new FirebaseAuthException();
-            }
 
             var signUpInfo = await response.Content.ReadAsAsync<SignInInfo>();
             var accountInfo = await GetAccountInfo(signUpInfo.idToken);
@@ -75,21 +60,13 @@ namespace Firebase.Net.Auth
                                 false, metadata, null, accountInfo.photoUrl, null, null,
                                 signUpInfo.refreshToken, signUpInfo.localId);
             return user;
-        } 
+        }
 
         public async Task<User> SignInWithEmailAndPassword(string email, string password)
         {
             string url = Endpoints.SignIn + EndpointKeySuffix;
             var body = new { email, password, returnSecureToken = true };
             var response = await Client.PostAsJsonAsync(url, body);
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsAsync<Error>();
-                if (error != null)
-                    throw error.GetCorrespondingException();
-
-                throw new FirebaseAuthException();
-            }
 
             var signInInfo = await response.Content.ReadAsAsync<SignInInfo>();
             var accountInfo = await GetAccountInfo(signInInfo.idToken);
@@ -105,14 +82,6 @@ namespace Firebase.Net.Auth
             string url = Endpoints.SignUp + EndpointKeySuffix;
             var body = new { returnSecureToken = true };
             var response = await Client.PostAsJsonAsync(url, body);
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsAsync<Error>();
-                if (error != null)
-                    throw error.GetCorrespondingException();
-
-                throw new FirebaseAuthException();
-            }
 
             var signInInfo = await response.Content.ReadAsAsync<SignInInfo>();
             var user = new User(null, null, false, true, null, null, null, null, null,
@@ -125,14 +94,6 @@ namespace Firebase.Net.Auth
             string url = Endpoints.SendConfirmationEmail + EndpointKeySuffix;
             var body = new { requestType = RequestTypes.PasswordReset, email };
             var response = await Client.PostAsJsonAsync(url, body);
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsAsync<Error>();
-                if (error != null)
-                    throw error.GetCorrespondingException();
-
-                throw new FirebaseAuthException();
-            }
         }
 
         public async Task<bool> VerifyPasswordResetCode(string code)
@@ -140,14 +101,6 @@ namespace Firebase.Net.Auth
             string url = Endpoints.ResetPassword + EndpointKeySuffix;
             var body = new { oobCode = code };
             var response = await Client.PostAsJsonAsync(url, body);
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsAsync<Error>();
-                if (error != null)
-                    throw error.GetCorrespondingException();
-
-                throw new FirebaseAuthException();
-            }
             return true;
         }
 
@@ -156,14 +109,6 @@ namespace Firebase.Net.Auth
             string url = Endpoints.ResetPassword + EndpointKeySuffix;
             var body = new { oobCode = code, newPassword };
             var response = await Client.PostAsJsonAsync(url, body);
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsAsync<Error>();
-                if (error != null)
-                    throw error.GetCorrespondingException();
-
-                throw new FirebaseAuthException();
-            }
         }
 
         public async Task SendEmailVerificationEmail(string idToken)
@@ -171,14 +116,6 @@ namespace Firebase.Net.Auth
             string url = Endpoints.SendConfirmationEmail + EndpointKeySuffix;
             var body = new { requestType = RequestTypes.VerifyEmail, idToken };
             var response = await Client.PostAsJsonAsync(url, body);
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsAsync<Error>();
-                if (error != null)
-                    throw error.GetCorrespondingException();
-
-                throw new FirebaseAuthException();
-            }
         }
 
         public async Task ConfirmEmailVerification(string code)
@@ -186,14 +123,6 @@ namespace Firebase.Net.Auth
             string url = Endpoints.SetAccountInfo + EndpointKeySuffix;
             var body = new { oobCode = code };
             var response = await Client.PostAsJsonAsync(url, body);
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsAsync<Error>();
-                if (error != null)
-                    throw error.GetCorrespondingException();
-
-                throw new FirebaseAuthException();
-            }
         }
 
         public async Task ChangeEmail(string idToken, string newEmail)
@@ -201,14 +130,6 @@ namespace Firebase.Net.Auth
             string url = Endpoints.SetAccountInfo + EndpointKeySuffix;
             var body = new { idToken, email = newEmail, returnSecureToken = true };
             var response = await Client.PostAsJsonAsync(url, body);
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsAsync<Error>();
-                if (error != null)
-                    throw error.GetCorrespondingException();
-
-                throw new FirebaseAuthException();
-            }
         }
 
         public async Task ChangePassword(string idToken, string newPassword)
@@ -216,14 +137,6 @@ namespace Firebase.Net.Auth
             string url = Endpoints.SetAccountInfo + EndpointKeySuffix;
             var body = new { idToken, password = newPassword, returnSecureToken = true };
             var response = await Client.PostAsJsonAsync(url, body);
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsAsync<Error>();
-                if (error != null)
-                    throw error.GetCorrespondingException();
-
-                throw new FirebaseAuthException();
-            }
         }
 
         public async Task DeleteAccount(string idToken)
@@ -231,14 +144,6 @@ namespace Firebase.Net.Auth
             string url = Endpoints.DeleteAccount + EndpointKeySuffix;
             var body = new { idToken };
             var response = await Client.PostAsJsonAsync(url, body);
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsAsync<Error>();
-                if (error != null)
-                    throw error.GetCorrespondingException();
-
-                throw new FirebaseAuthException();
-            }
         }
     }
 }
