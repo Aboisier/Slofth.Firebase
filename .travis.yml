@@ -1,0 +1,8 @@
+language: csharp
+solution: Firebase.Net.sln
+install:
+  - nuget restore Firebase.Net.sln
+  - nuget install NUnit.Runners -Version 3.8.0 -OutputDirectory testrunner
+script:
+  - xbuild /p:Configuration=Release Firebase.Net.sln
+  - mono ./testrunner/NUnit.ConsoleRunner.3.8.0/tools/nunit3-console.exe ./Firebase.Net.Tests/bin/Release/Firebase.Net.Tests.dll
