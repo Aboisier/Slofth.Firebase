@@ -1,13 +1,22 @@
-﻿namespace Firebase.Net.Auth
+﻿using Newtonsoft.Json;
+
+namespace Firebase.Net.Auth
 {
     class SignInInfo
     {
-        public string kind { get; set; }
-        public string idToken { get; set; }
-        public string email { get; set; }
-        public string refreshToken { get; set; }
-        public string expiresIn { get; set; }
-        public string localId { get; set; }
-        public string registered { get; set; }
+        [JsonProperty("kind")]
+        public string Kind { get; set; }
+        [JsonProperty("idToken")]
+        public string IdToken { get; set; }
+        [JsonProperty("email")]
+        public string Email { get; set; }
+        [JsonProperty("refreshToken")]
+        public string RefreshToken { get; set; }
+        [JsonProperty("expiresIn")]
+        public string ExpiresIn { get; set; }
+        [JsonProperty("localId")]
+        public string LocalId { get; set; }
+        [JsonProperty("registered")]
+        public string Registered { get; set; }
     }
 }

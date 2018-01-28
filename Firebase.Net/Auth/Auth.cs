@@ -54,11 +54,11 @@ namespace Firebase.Net.Auth
             var response = await Client.PostAsJsonAsync(url, body);
 
             var signUpInfo = await response.Content.ReadAsAsync<SignInInfo>();
-            var accountInfo = await GetAccountInfo(signUpInfo.idToken);
+            var accountInfo = await GetAccountInfo(signUpInfo.IdToken);
             var metadata = new UserMetadata(accountInfo.createdAt, accountInfo.lastLoginAt);
             var user = new User(accountInfo.displayName, accountInfo.email, accountInfo.emailVerified,
                                 false, metadata, null, accountInfo.photoUrl, null, null,
-                                signUpInfo.refreshToken, signUpInfo.localId);
+                                signUpInfo.RefreshToken, signUpInfo.LocalId);
             return user;
         }
 
@@ -69,11 +69,11 @@ namespace Firebase.Net.Auth
             var response = await Client.PostAsJsonAsync(url, body);
 
             var signInInfo = await response.Content.ReadAsAsync<SignInInfo>();
-            var accountInfo = await GetAccountInfo(signInInfo.idToken);
+            var accountInfo = await GetAccountInfo(signInInfo.IdToken);
             var metadata = new UserMetadata(accountInfo.createdAt, accountInfo.lastLoginAt);
             var user = new User(accountInfo.displayName, accountInfo.email, accountInfo.emailVerified,
                                 false, metadata, null, accountInfo.photoUrl, null, null,
-                                signInInfo.refreshToken, signInInfo.localId);
+                                signInInfo.RefreshToken, signInInfo.LocalId);
             return user;
         }
 
@@ -85,7 +85,7 @@ namespace Firebase.Net.Auth
 
             var signInInfo = await response.Content.ReadAsAsync<SignInInfo>();
             var user = new User(null, null, false, true, null, null, null, null, null,
-                                signInInfo.refreshToken, signInInfo.localId);
+                                signInInfo.RefreshToken, signInInfo.LocalId);
             return user;
         }
 
