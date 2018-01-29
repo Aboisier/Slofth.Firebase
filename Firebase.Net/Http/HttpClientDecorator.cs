@@ -9,7 +9,7 @@ namespace Firebase.Net.Http
 
         protected HttpClientDecorator(IHttpClientFacade baseComponent)
         {
-            BaseComponent = BaseComponent;
+            BaseComponent = baseComponent;
         }
 
         public abstract Task<HttpResponseMessage> GetAsync(string url);
