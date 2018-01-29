@@ -159,5 +159,33 @@ namespace PolyPaint.Tests.Services
 
             Assert.AreEqual(expected.ToJson(), actual.ToJson());
         }
+
+        [Test]
+        public async Task OrderByAgeLimitToFirst_People_ShouldReturnFirstPeople()
+        {
+            // Act
+            var result = await Database.Ref("People")
+                                       .OrderBy("Age")
+                                       .LimitToFirst(2)
+                                       .Once<Dictionary<string, Person>>();
+
+            // Assert
+            Assert.IsTrue(result.ContainsKey("jbond"));
+            Assert.IsTrue(result.ContainsKey("wwhitman"));
+        }
+
+        [Test]
+        public async Task OrderByAgeLimitToLast_People_ShouldReturnFirstPeople()
+        {
+            // Act
+            var result = await Database.Ref("People")
+                                       .OrderBy("Age")
+                                       .LimitToLast(2)
+                                       .Once<Dictionary<string, Person>>();
+
+            // Assert
+            Assert.IsTrue(result.ContainsKey("dvader"));
+            Assert.IsTrue(result.ContainsKey("et"));
+        }
     }
 }
