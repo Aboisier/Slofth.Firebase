@@ -39,15 +39,6 @@ namespace Firebase.Net.Auth
             Client = Http.HttpClientFactory.Create(new Uri(Endpoints.ApiBase));
         }
 
-        private async Task<AccountInfo> GetAccountInfo(string idToken)
-        {
-            string url = Endpoints.GetAccountInfo + EndpointKeySuffix;
-            var body = new { idToken };
-            var response = await Client.PostAsJsonAsync(url, body);
-
-            return await response.Content.ReadAsAsync<AccountInfo>();
-        }
-
         public async Task<User> CreateUserWithEmailAndPassword(string email, string password)
         {
             string url = Endpoints.SignUp + EndpointKeySuffix;
@@ -121,20 +112,6 @@ namespace Firebase.Net.Auth
             var response = await Client.PostAsJsonAsync(url, body);
         }
 
-        public async Task SendEmailVerificationEmail(string idToken)
-        {
-            string url = Endpoints.SendConfirmationEmail + EndpointKeySuffix;
-            var body = new { requestType = RequestTypes.VerifyEmail, idToken };
-            var response = await Client.PostAsJsonAsync(url, body);
-        }
-
-        public async Task ConfirmEmailVerification(string code)
-        {
-            string url = Endpoints.SetAccountInfo + EndpointKeySuffix;
-            var body = new { oobCode = code };
-            var response = await Client.PostAsJsonAsync(url, body);
-        }
-
         public async Task ChangeEmail(string idToken, string newEmail)
         {
             string url = Endpoints.SetAccountInfo + EndpointKeySuffix;
@@ -149,10 +126,33 @@ namespace Firebase.Net.Auth
             var response = await Client.PostAsJsonAsync(url, body);
         }
 
+        private async Task<AccountInfo> GetAccountInfo(string idToken)
+        {
+            string url = Endpoints.GetAccountInfo + EndpointKeySuffix;
+            var body = new { idToken };
+            var response = await Client.PostAsJsonAsync(url, body);
+
+            return await response.Content.ReadAsAsync<AccountInfo>();
+        }
+
         public async Task LinkWithEmailAndPassword(string idToken, string email, string password)
         {
             string url = Endpoints.SetAccountInfo + EndpointKeySuffix;
             var body = new { idToken, email, password, returnSecureToken = true };
+            var response = await Client.PostAsJsonAsync(url, body);
+        }
+
+        public async Task SendEmailVerificationEmail(string idToken)
+        {
+            string url = Endpoints.SendConfirmationEmail + EndpointKeySuffix;
+            var body = new { requestType = RequestTypes.VerifyEmail, idToken };
+            var response = await Client.PostAsJsonAsync(url, body);
+        }
+
+        public async Task ConfirmEmailVerification(string code)
+        {
+            string url = Endpoints.SetAccountInfo + EndpointKeySuffix;
+            var body = new { oobCode = code };
             var response = await Client.PostAsJsonAsync(url, body);
         }
 
