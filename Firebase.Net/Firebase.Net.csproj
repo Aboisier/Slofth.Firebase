@@ -50,15 +50,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Database\FirebaseDatabaseExceptions.cs" />
     <Compile Include="Database\PostInfo.cs" />
     <Compile Include="Database\Query.cs" />
     <Compile Include="Database\Database.cs" />
     <Compile Include="Database\FilterQuery.cs" />
     <Compile Include="Database\ChildQuery.cs" />
-    <Compile Include="Exceptions.cs" />
+    <Compile Include="Auth\FirebaseAuthExceptions.cs" />
+    <Compile Include="FirebaseException.cs" />
+    <Compile Include="Http\FirebaseDatabaseError.cs" />
+    <Compile Include="Http\IFirebaseError.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\UrlBuilder.cs" />
-    <Compile Include="Http\Error.cs" />
+    <Compile Include="Http\FirebaseAuthError.cs" />
     <Compile Include="Http\HttpClientDecorator.cs" />
     <Compile Include="Http\HttpClientFactory.cs" />
     <Compile Include="Http\FirebaseErrorHandlingDecorator.cs" />

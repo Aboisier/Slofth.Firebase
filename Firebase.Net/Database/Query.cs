@@ -1,5 +1,7 @@
-﻿using Firebase.Net.Utils;
+﻿using Firebase.Net.Http;
+using Firebase.Net.Utils;
 using Newtonsoft.Json;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -7,7 +9,7 @@ namespace Firebase.Net.Database
 {
     public abstract partial class Query
     {
-        protected HttpClient Client { get; set; }
+        protected IFirebaseHttpClientFacade Client { get; set; }
         protected UrlBuilder UrlBuilder { get; set; }
         public string Key { get; private set; }
 
@@ -15,7 +17,7 @@ namespace Firebase.Net.Database
         {
             UrlBuilder = urlBuilder;
             Key = name;
-            Client = new HttpClient();
+            Client = FirebaseHttpClientFactory.CreateFirebaseDatabaseHttpClient();
         }
 
         /// <summary>

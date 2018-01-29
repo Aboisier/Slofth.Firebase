@@ -1,6 +1,6 @@
-﻿using Firebase.Net.Utils;
+﻿using Firebase.Net.Http;
+using Firebase.Net.Utils;
 using System;
-using System.Net.Http;
 
 namespace Firebase.Net.Database
 {
@@ -8,7 +8,7 @@ namespace Firebase.Net.Database
     {
         private Func<string> TokenIdFactory { get; set; }
 
-        private HttpClient Client { get; set; }
+        private IFirebaseHttpClientFacade Client { get; set; }
         private string DatabaseUrl { get; set; }
 
         public Database(string databaseUrl, Func<string> tokenIdFactory)
@@ -16,7 +16,7 @@ namespace Firebase.Net.Database
             DatabaseUrl = databaseUrl;
             TokenIdFactory = tokenIdFactory;
 
-            Client = new HttpClient();
+            Client = FirebaseHttpClientFactory.CreateFirebaseDatabaseHttpClient();
         }
 
         public ChildQuery Ref(string name)

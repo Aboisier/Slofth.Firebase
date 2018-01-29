@@ -249,5 +249,27 @@ namespace PolyPaint.Tests.Services
             Assert.IsTrue(result.ContainsKey("jbond"));
             Assert.AreEqual(1, result.Count);
         }
+
+        [Test]
+        public async Task Once_InvalidTokenType_ShouldThrowCouldNotParseAuthTokenException()
+        {
+            // Arrange
+            Database UnauthenticatedDatabase = new Database(DatabaseUrl, () => "dummy_token");
+            await FirebaseHelper.UpdateRules("DenyEverything.json");
+
+            // Act & Assert
+            Assert.That(async () => await UnauthenticatedDatabase.Ref("People").Once<Dictionary<string, Person>>(), Throws.Exception.InstanceOf<CouldNotParseAuthTokenException>());
+        }
+
+        [Test]
+        public async Task Once_InvalidToken_ShouldThrowCouldNotParseAuthTokenException()
+        {
+            // Arrange
+            Database UnauthenticatedDatabase = new Database(DatabaseUrl, () => "2K7qdbC2X9nQNRzlqQC14XmsGPR6Y5phUfxC2B5Z");
+            await FirebaseHelper.UpdateRules("DenyEverything.json");
+
+            // Act & Assert
+            Assert.That(async () => await UnauthenticatedDatabase.Ref("People").Once<Dictionary<string, Person>>(), Throws.Exception.InstanceOf<CouldNotParseAuthTokenException>());
+        }
     }
 }

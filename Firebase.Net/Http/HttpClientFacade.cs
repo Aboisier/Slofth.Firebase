@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Firebase.Net.Http
 {
-    class HttpClientFacade : IHttpClientFacade
+    class HttpClientFacade : IFirebaseHttpClientFacade
     {
         private HttpClient Client { get; set; }
 

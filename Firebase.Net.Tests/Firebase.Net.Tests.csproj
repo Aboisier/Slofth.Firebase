@@ -67,7 +67,7 @@
   <ItemGroup>
     <Compile Include="Database\DatabaseTests.cs" />
     <Compile Include="Utils\UrlBuilderTests.cs" />
-    <Compile Include="Http\ErrorTests.cs" />
+    <Compile Include="Http\FirebaseAuthErrorTests.cs" />
     <Compile Include="Http\FirebaseErrorHandlingDecoratorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestUtils\FirebaseUtils.cs" />
@@ -83,6 +83,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="TestData\Database\People.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\Rules\DenyEverything.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

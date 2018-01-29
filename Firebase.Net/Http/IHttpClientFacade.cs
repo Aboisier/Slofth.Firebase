@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Firebase.Net.Http
 {
-    public interface IHttpClientFacade
+    public interface IFirebaseHttpClientFacade
     {
         Task<HttpResponseMessage> GetAsync(string url);
         Task<HttpResponseMessage> PostAsJsonAsync<T>(string url, T value);

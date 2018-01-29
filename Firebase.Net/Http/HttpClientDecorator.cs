@@ -3,13 +3,13 @@ using System.Threading.Tasks;
 
 namespace Firebase.Net.Http
 {
-    public abstract class HttpClientDecorator : IHttpClientFacade
+    public abstract class HttpClientDecorator : IFirebaseHttpClientFacade
     {
-        protected IHttpClientFacade BaseComponent { get; set; }
+        protected IFirebaseHttpClientFacade BaseComponent { get; set; }
 
-        protected HttpClientDecorator(IHttpClientFacade baseComponent)
+        protected HttpClientDecorator(IFirebaseHttpClientFacade baseComponent)
         {
-            BaseComponent = BaseComponent;
+            BaseComponent = baseComponent;
         }
 
         public abstract Task<HttpResponseMessage> GetAsync(string url);
