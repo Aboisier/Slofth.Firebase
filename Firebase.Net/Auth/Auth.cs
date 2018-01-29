@@ -29,9 +29,25 @@ namespace Firebase.Net.Auth
             public static readonly string VerifyEmail = "VERIFY_EMAIL";
         }
 
+        public event EventHandler<User> OnAuthStateChanged;
+
         private string ApiKey { get; set; }
         private IHttpClientFacade Client { get; set; }
         private string EndpointKeySuffix => $"?key={ApiKey}";
+
+        private User currentUser;
+        public User CurrentUser
+        {
+            get => currentUser;
+            private set
+            {
+                if (value != currentUser)
+                {
+                    currentUser = value;
+                    OnAuthStateChanged.Invoke(this, currentUser);
+                }
+            }
+        }
 
         public Auth(string apiKey)
         {
@@ -51,6 +67,7 @@ namespace Firebase.Net.Auth
             var user = new User(accountInfo.DisplayName, accountInfo.Email, accountInfo.EmailVerified,
                                 false, metadata, null, accountInfo.PhotoUrl, null, null,
                                 signUpInfo.RefreshToken, signUpInfo.LocalId);
+            CurrentUser = user;
             return user;
         }
 
@@ -66,6 +83,7 @@ namespace Firebase.Net.Auth
             var user = new User(accountInfo.DisplayName, accountInfo.Email, accountInfo.EmailVerified,
                                 false, metadata, null, accountInfo.PhotoUrl, null, null,
                                 signInInfo.RefreshToken, signInInfo.LocalId);
+            CurrentUser = user;
             return user;
         }
 
@@ -78,7 +96,13 @@ namespace Firebase.Net.Auth
             var signInInfo = await response.Content.ReadAsAsync<SignInInfo>();
             var user = new User(null, null, false, true, null, null, null, null, null,
                                 signInInfo.RefreshToken, signInInfo.LocalId);
+            CurrentUser = user;
             return user;
+        }
+
+        public async Task SignOut()
+        {
+            CurrentUser = null;
         }
 
         public async Task<List<string>> FetchProvidersForEmail(string email)
