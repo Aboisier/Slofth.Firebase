@@ -42,7 +42,7 @@ namespace PolyPaint.Tests.Services
         public async Task UpdateRules(string rulesFilePath)
         {
             var rules = ReadFile("Rules\\" + rulesFilePath);
-            await DatabaseHttpClient.PutAsJsonAsync(Constants.RulesEndpoint + AuthSuffix, new StringContent(rules));
+            await DatabaseHttpClient.PutAsync(Constants.RulesEndpoint + AuthSuffix, new StringContent(rules));
         }
 
         private async Task ResetRules()
