@@ -1,6 +1,9 @@
 ﻿{
   "rules": {
-    ".read": true,
-    ".write": true
+    ".read": "true",
+    ".write": "true",
+    "People": {
+      ".indexOn": "Age"
+    }
   }
 }
