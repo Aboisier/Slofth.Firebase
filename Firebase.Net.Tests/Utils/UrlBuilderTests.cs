@@ -21,6 +21,19 @@ namespace Firebase.Net.Tests.Extensions
         }
 
         [Test]
+        public void AddParam_MultipleParams_ShouldBuildExpectedUri()
+        {
+            // Arrange
+            var baseUrl = "https://www.example.com";
+
+            // Act
+            var builder = UrlBuilder.Create(baseUrl).AddParam("my_param", "val").AddParam("my_other_param", 3);
+
+            // Assert
+            Assert.AreEqual("?my_param=val&my_other_param=3", builder.Query);
+        }
+
+        [Test]
         public void AddParam_IntParam_ShouldBuildExpectedUri()
         {
             // Arrange
