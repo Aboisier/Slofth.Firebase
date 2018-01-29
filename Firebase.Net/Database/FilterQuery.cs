@@ -22,17 +22,28 @@ namespace Firebase.Net.Database
 
         public FilterQuery StartAt(string value)
         {
+            return new FilterQuery(UrlBuilder.AddParam(Params.StartAt, Quote(value)), Key);
+        }
+
+        public FilterQuery StartAt(int value)
+        {
             return new FilterQuery(UrlBuilder.AddParam(Params.StartAt, value), Key);
         }
 
         public FilterQuery EndAt(string value)
         {
+            return new FilterQuery(UrlBuilder.AddParam(Params.EndAt, Quote(value)), Key);
+        }
+
+        public FilterQuery EndAt(int value)
+        {
             return new FilterQuery(UrlBuilder.AddParam(Params.EndAt, value), Key);
         }
 
+
         public FilterQuery EqualTo(string value)
         {
-            return new FilterQuery(UrlBuilder.AddParam(Params.EqualTo, value), Key);
+            return new FilterQuery(UrlBuilder.AddParam(Params.EqualTo, Quote(value)), Key);
         }
 
         //public override Task<T> Once<T>()

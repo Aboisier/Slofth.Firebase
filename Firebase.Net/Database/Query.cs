@@ -70,6 +70,11 @@ namespace Firebase.Net.Database
             var response = await Client.DeleteAsync(UrlBuilder.Url);
         }
 
+        protected string Quote(string text)
+        {
+            return $"\"{text}\"";
+        }
+
         class Endpoints
         {
             public static readonly string Json = ".json";

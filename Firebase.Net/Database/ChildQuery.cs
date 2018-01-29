@@ -14,7 +14,7 @@ namespace Firebase.Net.Database
         /// <param name="property">The property used to sort. To access a nested property, use slashes (ex.: info/dimensions/height).</param>
         public FilterQuery OrderBy(string property)
         {
-            return new FilterQuery(UrlBuilder.AddParam(Params.OrderBy, $"\"{property}\""), Key);
+            return new FilterQuery(UrlBuilder.AddParam(Params.OrderBy, Quote(property)), Key);
         }
 
         public FilterQuery OrderByKey()
