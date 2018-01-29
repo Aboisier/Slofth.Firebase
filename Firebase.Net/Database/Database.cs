@@ -7,7 +7,6 @@ namespace Firebase.Net.Database
     public class Database
     {
         private Func<string> TokenIdFactory { get; set; }
-        private string AuthParam => $"auth={TokenIdFactory()}";
 
         private HttpClient Client { get; set; }
         private string DatabaseUrl { get; set; }
@@ -24,9 +23,15 @@ namespace Firebase.Net.Database
         {
             var builder = UrlBuilder
                 .Create(DatabaseUrl)
-                .AddParam("auth", TokenIdFactory());
+                .AppendToPath(name)
+                .AddParam(Params.Auth, TokenIdFactory());
 
             return new ChildQuery(builder, name);
+        }
+
+        class Params
+        {
+            public static readonly string Auth = "auth";
         }
     }
 }
