@@ -187,5 +187,49 @@ namespace PolyPaint.Tests.Services
             Assert.IsTrue(result.ContainsKey("dvader"));
             Assert.IsTrue(result.ContainsKey("et"));
         }
+
+        [Test]
+        public async Task OrderByAgeStartAt_People_ShouldReturnExpctedPeople()
+        {
+            // Act
+            var result = await Database.Ref("People")
+                                       .OrderBy("Age")
+                                       .StartAt(100)
+                                       .Once<Dictionary<string, Person>>();
+
+            // Assert
+            Assert.IsTrue(result.ContainsKey("dvader"));
+            Assert.IsTrue(result.ContainsKey("et"));
+        }
+
+        [Test]
+        public async Task OrderByAgeEndAt_People_ShouldReturnExpectedPeople()
+        {
+            // Act
+            var result = await Database.Ref("People")
+                                       .OrderBy("Age")
+                                       .EndAt(25)
+                                       .Once<Dictionary<string, Person>>();
+
+            // Assert
+            Assert.IsTrue(result.ContainsKey("jbond"));
+            Assert.IsTrue(result.ContainsKey("wwhitman"));
+            Assert.IsTrue(result.ContainsKey("jcavalleri"));
+        }
+
+        [Test]
+        public async Task OrderByKeyEndAtJbon_People_ShouldReturnExpectedPeople()
+        {
+            // Act
+            var result = await Database.Ref("People")
+                                       .OrderByKey()
+                                       .EndAt("jbond")
+                                       .Once<Dictionary<string, Person>>();
+
+            // Assert
+            Assert.IsTrue(result.ContainsKey("dvader"));
+            Assert.IsTrue(result.ContainsKey("et"));
+            Assert.IsTrue(result.ContainsKey("jbond"));
+        }
     }
 }
