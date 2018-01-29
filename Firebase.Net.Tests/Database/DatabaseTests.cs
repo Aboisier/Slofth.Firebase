@@ -235,5 +235,19 @@ namespace PolyPaint.Tests.Services
             Assert.IsTrue(result.ContainsKey("et"));
             Assert.IsTrue(result.ContainsKey("jbond"));
         }
+
+        [Test]
+        public async Task OrderByEqualTo_People_ShouldReturnExpectedPeople()
+        {
+            // Act
+            var result = await Database.Ref("People")
+                                       .OrderByKey()
+                                       .EqualTo("jbond")
+                                       .Once<Dictionary<string, Person>>();
+
+            // Assert
+            Assert.IsTrue(result.ContainsKey("jbond"));
+            Assert.AreEqual(1, result.Count);
+        }
     }
 }
