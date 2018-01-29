@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Auth\AccountInfo.cs" />
     <Compile Include="Auth\Auth.cs" />
+    <Compile Include="Auth\FetchProvidersResponse.cs" />
     <Compile Include="Auth\SignInInfo.cs" />
     <Compile Include="Auth\User.cs" />
     <Compile Include="Auth\UserInfo.cs" />
