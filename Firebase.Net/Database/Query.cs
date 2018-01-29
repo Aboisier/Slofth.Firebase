@@ -13,7 +13,7 @@ namespace Firebase.Net.Database
 
         public Query(UrlBuilder urlBuilder, string name)
         {
-            UrlBuilder = urlBuilder.AppendToPath(name);
+            UrlBuilder = urlBuilder;
             Key = name;
             Client = new HttpClient();
         }
@@ -23,7 +23,7 @@ namespace Firebase.Net.Database
         /// </summary>
         /// <typeparam name="T">Type of the data.</typeparam>
         /// <returns>The deserialized data.</returns>
-        public async Task<T> Once<T>()
+        public async virtual Task<T> Once<T>()
         {
             UrlBuilder.AppendToPath(Endpoints.Json);
             var response = await Client.GetAsync(UrlBuilder.Url);
@@ -48,7 +48,7 @@ namespace Firebase.Net.Database
 
         public ChildQuery Child(string name)
         {
-            return new ChildQuery(UrlBuilder, name);
+            return new ChildQuery(UrlBuilder.AppendToPath(name), name);
         }
 
         public async Task<ChildQuery> Push()
