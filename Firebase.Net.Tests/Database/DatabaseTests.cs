@@ -161,7 +161,7 @@ namespace PolyPaint.Tests.Services
         }
 
         [Test]
-        public async Task OrderByAgeLimitToFirst_People_ShouldReturnFirstPeople()
+        public async Task OrderByAgeLimitToFirst_People_ShouldReturnFirstTwoPeople()
         {
             // Act
             var result = await Database.Ref("People")
@@ -175,7 +175,7 @@ namespace PolyPaint.Tests.Services
         }
 
         [Test]
-        public async Task OrderByAgeLimitToLast_People_ShouldReturnFirstPeople()
+        public async Task OrderByAgeLimitToLast_People_ShouldReturnLastTwoPeople()
         {
             // Act
             var result = await Database.Ref("People")
