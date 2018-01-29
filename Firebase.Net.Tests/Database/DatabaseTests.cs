@@ -172,6 +172,7 @@ namespace PolyPaint.Tests.Services
             // Assert
             Assert.IsTrue(result.ContainsKey("jbond"));
             Assert.IsTrue(result.ContainsKey("wwhitman"));
+            Assert.AreEqual(2, result.Count);
         }
 
         [Test]
@@ -186,6 +187,7 @@ namespace PolyPaint.Tests.Services
             // Assert
             Assert.IsTrue(result.ContainsKey("dvader"));
             Assert.IsTrue(result.ContainsKey("et"));
+            Assert.AreEqual(2, result.Count);
         }
 
         [Test]
@@ -200,6 +202,7 @@ namespace PolyPaint.Tests.Services
             // Assert
             Assert.IsTrue(result.ContainsKey("dvader"));
             Assert.IsTrue(result.ContainsKey("et"));
+            Assert.AreEqual(2, result.Count);
         }
 
         [Test]
@@ -215,6 +218,7 @@ namespace PolyPaint.Tests.Services
             Assert.IsTrue(result.ContainsKey("jbond"));
             Assert.IsTrue(result.ContainsKey("wwhitman"));
             Assert.IsTrue(result.ContainsKey("jcavalleri"));
+            Assert.AreEqual(3, result.Count);
         }
 
         [Test]
