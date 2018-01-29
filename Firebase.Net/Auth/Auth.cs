@@ -1,5 +1,6 @@
 ﻿using Firebase.Net.Http;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -87,6 +88,15 @@ namespace Firebase.Net.Auth
             var user = new User(null, null, false, true, null, null, null, null, null,
                                 signInInfo.RefreshToken, signInInfo.LocalId);
             return user;
+        }
+
+        public async Task<List<string>> FetchProvidersForEmail(string email)
+        {
+            string url = Endpoints.CreateAuthUri + EndpointKeySuffix;
+            var body = new { identifier = email, continueUri = "" };
+            var response = await Client.PostAsJsonAsync(url, body);
+            var providersResponse = await response.Content.ReadAsAsync<FetchProvidersResponse>();
+            return providersResponse.AllProviders;
         }
 
         public async Task SendPasswordResetEmail(string email)
