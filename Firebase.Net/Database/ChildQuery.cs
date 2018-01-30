@@ -1,11 +1,12 @@
 ﻿using Firebase.Net.Utils;
+using System;
 
 namespace Firebase.Net.Database
 {
     public class ChildQuery : Query
     {
-        public ChildQuery(UrlBuilder builder, string name)
-            : base(builder, name)
+        internal ChildQuery(UrlBuilder builder, string name, Func<string> idTokenFactory)
+            : base(builder, name, idTokenFactory)
         { }
 
         /// <summary>
@@ -14,7 +15,7 @@ namespace Firebase.Net.Database
         /// <param name="property">The property used to sort. To access a nested property, use slashes (ex.: info/dimensions/height).</param>
         public FilterQuery OrderBy(string property)
         {
-            return new FilterQuery(UrlBuilder.AddParam(Params.OrderBy, Quote(property)), Key);
+            return new FilterQuery(UrlBuilder.AddParam(Params.OrderBy, Quote(property)), Key, IdTokenFactory);
         }
 
         public FilterQuery OrderByKey()

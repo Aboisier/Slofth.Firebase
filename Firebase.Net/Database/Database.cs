@@ -4,6 +4,11 @@ using System;
 
 namespace Firebase.Net.Database
 {
+    public enum DatabaseEvent
+    {
+        Value, ChildAdded, ChildChanged, ChildRemoved, ChildMoved
+    }
+
     public class Database
     {
         private Func<string> TokenIdFactory { get; set; }
@@ -23,15 +28,9 @@ namespace Firebase.Net.Database
         {
             var builder = UrlBuilder
                 .Create(DatabaseUrl)
-                .AppendToPath(name)
-                .AddParam(Params.Auth, TokenIdFactory());
-
-            return new ChildQuery(builder, name);
-        }
-
-        class Params
-        {
-            public static readonly string Auth = "auth";
+                .AppendToPath(name);
+             
+            return new ChildQuery(builder, name, TokenIdFactory);
         }
     }
 }

@@ -271,5 +271,13 @@ namespace PolyPaint.Tests.Services
             // Act & Assert
             Assert.That(async () => await UnauthenticatedDatabase.Ref("People").Once<Dictionary<string, Person>>(), Throws.Exception.InstanceOf<CouldNotParseAuthTokenException>());
         }
+
+        [Test]
+        public void Testy()
+        {
+            Database.Ref("People").On<Dictionary<string, Person>>();
+            while (true)
+            { }
+        }
     }
 }

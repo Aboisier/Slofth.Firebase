@@ -14,7 +14,7 @@ namespace Firebase.Net.Http
             return CreateErrorHandlerHttpClient<FirebaseDatabaseError>();
         }
 
-        public static IFirebaseHttpClientFacade CreateErrorHandlerHttpClient<TError>() where TError : IFirebaseError, new()
+        private static IFirebaseHttpClientFacade CreateErrorHandlerHttpClient<TError>() where TError : IFirebaseError, new()
         {
             IFirebaseHttpClientFacade client = new HttpClientFacade();
             client = new FirebaseErrorHandlingDecorator<TError>(client);

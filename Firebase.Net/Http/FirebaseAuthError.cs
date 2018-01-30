@@ -4,7 +4,7 @@ using System;
 
 namespace Firebase.Net.Http
 {
-    public class FirebaseAuthError : IFirebaseError
+    internal class FirebaseAuthError : IFirebaseError
     {
         private static class Messages
         {

@@ -4,7 +4,7 @@ using System.Web;
 
 namespace Firebase.Net.Utils
 {
-    public class UrlBuilder
+    internal class UrlBuilder
     {
         public string Query => Builder.Query;
         public string Path => Builder.Path;

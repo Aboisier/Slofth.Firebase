@@ -1,49 +1,48 @@
 ﻿using Firebase.Net.Utils;
-using System.Net.Http;
-using System.Threading.Tasks;
+using System;
 
 namespace Firebase.Net.Database
 {
     public class FilterQuery : Query
     {
-        public FilterQuery(UrlBuilder urlBuilder, string name)
-             : base(urlBuilder, name)
+        internal FilterQuery(UrlBuilder urlBuilder, string name, Func<string> idTokenFactory)
+             : base(urlBuilder, name, idTokenFactory)
         { }
 
         public FilterQuery LimitToFirst(int value)
         {
-            return new FilterQuery(UrlBuilder.AddParam(Params.LimitToFirst, value), Key);
+            return new FilterQuery(UrlBuilder.AddParam(Params.LimitToFirst, value), Key, IdTokenFactory);
         }
 
         public FilterQuery LimitToLast(int value)
         {
-            return new FilterQuery(UrlBuilder.AddParam(Params.LimitToLast, value), Key);
+            return new FilterQuery(UrlBuilder.AddParam(Params.LimitToLast, value), Key, IdTokenFactory);
         }
 
         public FilterQuery StartAt(string value)
         {
-            return new FilterQuery(UrlBuilder.AddParam(Params.StartAt, Quote(value)), Key);
+            return new FilterQuery(UrlBuilder.AddParam(Params.StartAt, Quote(value)), Key, IdTokenFactory);
         }
 
         public FilterQuery StartAt(int value)
         {
-            return new FilterQuery(UrlBuilder.AddParam(Params.StartAt, value), Key);
+            return new FilterQuery(UrlBuilder.AddParam(Params.StartAt, value), Key, IdTokenFactory);
         }
 
         public FilterQuery EndAt(string value)
         {
-            return new FilterQuery(UrlBuilder.AddParam(Params.EndAt, Quote(value)), Key);
+            return new FilterQuery(UrlBuilder.AddParam(Params.EndAt, Quote(value)), Key, IdTokenFactory);
         }
 
         public FilterQuery EndAt(int value)
         {
-            return new FilterQuery(UrlBuilder.AddParam(Params.EndAt, value), Key);
+            return new FilterQuery(UrlBuilder.AddParam(Params.EndAt, value), Key, IdTokenFactory);
         }
 
 
         public FilterQuery EqualTo(string value)
         {
-            return new FilterQuery(UrlBuilder.AddParam(Params.EqualTo, Quote(value)), Key);
+            return new FilterQuery(UrlBuilder.AddParam(Params.EqualTo, Quote(value)), Key, IdTokenFactory);
         }
 
         //public override Task<T> Once<T>()
