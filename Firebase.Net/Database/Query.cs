@@ -28,6 +28,10 @@ namespace Firebase.Net.Database
             Key = name;
             IdTokenFactory = idTokenFactory;
             Client = FirebaseHttpClientFactory.CreateFirebaseDatabaseHttpClient();
+        }
+
+        static Query()
+        {
             Subscriptions = new ConcurrentDictionary<(Type, string), Subscription<object>>();
         }
 
@@ -52,14 +56,7 @@ namespace Firebase.Net.Database
 
         public virtual Subscription<T> On<T>()
         {
-            var subscription = GetSubscription<T>();
-
-            if (subscription == null)
-            {
-                subscription = CreateSubscription<T>();
-            }
-
-            return subscription;
+            return Subscription<T>.Create(UrlBuilder, IdTokenFactory);
         }
 
         /// <summary>
@@ -93,20 +90,6 @@ namespace Firebase.Net.Database
         {
             UrlBuilder.AppendToPath(Endpoints.Json).AddParam(Params.Auth, IdTokenFactory());
             var response = await Client.DeleteAsync(UrlBuilder.Url);
-        }
-
-        private Subscription<T> GetSubscription<T>()
-        {
-            Subscription<object> subscription;
-            Subscriptions.TryGetValue((typeof(T), UrlBuilder.Url), out subscription);
-            return subscription as Subscription<T>;
-        }
-
-        private Subscription<T> CreateSubscription<T>()
-        {
-            var subscription = new Subscription<T>(UrlBuilder, IdTokenFactory);
-            Subscriptions.TryAdd((typeof(T), UrlBuilder.Url), subscription as Subscription<object>);
-            return subscription;
         }
 
         protected string Quote(string text)

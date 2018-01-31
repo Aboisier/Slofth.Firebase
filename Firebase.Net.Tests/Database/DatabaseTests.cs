@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PolyPaint.Tests.Services
@@ -272,12 +273,91 @@ namespace PolyPaint.Tests.Services
             Assert.That(async () => await UnauthenticatedDatabase.Ref("People").Once<Dictionary<string, Person>>(), Throws.Exception.InstanceOf<CouldNotParseAuthTokenException>());
         }
 
-        [Test]
-        public void Testy()
+        [Test, Timeout(5000)]
+        public async Task Subscription_ChildAdded_ShouldCallEvent()
         {
-            Database.Ref("People").On<Dictionary<string, Person>>();
-            while (true)
-            { }
+            // Arrange
+            Semaphore mutex = new Semaphore(0, 1);
+            bool wasCalled = false;
+
+            Database
+                .Ref("People")
+                .On<Dictionary<string, Person>>()
+                .ChildAdded += (Dictionary<string, Person> people) =>
+            {
+                wasCalled = true;
+                Assert.AreEqual(9, people.Count);
+                mutex.Release();
+            };
+
+            // Act
+            await Database.Ref("People").Child("ttesterson").Set(new Person("Testy Testerson", 43, "Testing."));
+
+            // Assert
+            mutex.WaitOne();
+            Assert.IsTrue(wasCalled);
+
+        }
+
+        [Test, Timeout(5000)]
+        public async Task Subscription_ChildChanged_ShouldCallEvent()
+        {
+            // Arrange
+            Semaphore mutex = new Semaphore(0, 1);
+            bool wasCalled = false;
+
+            Database
+                .Ref("People")
+                .On<Dictionary<string, Person>>()
+                .ChildChanged += (Dictionary<string, Person> people) =>
+                {
+                    Assert.AreEqual(20, people["dvader"].Age);
+                    wasCalled = true;
+                    mutex.Release();
+                };
+
+            // Act
+            await Database.Ref("People").Child("dvader").Child("Age").Set(20);
+
+            // Assert
+            mutex.WaitOne();
+            Assert.IsTrue(wasCalled);
+        }
+
+        [Test, Timeout(5000000)]
+        public async Task Subscription_ChildRemoved_ShouldCallEvent()
+        {
+            // Arrange
+            Semaphore mutex = new Semaphore(0, 1);
+            bool wasCalled = false;
+
+            Database
+                .Ref("People")
+                .On<Dictionary<string, Person>>()
+                .ChildRemoved += (Dictionary<string, Person> people) =>
+                {
+                    Assert.AreEqual(7, people.Count);
+                    wasCalled = true;
+                    mutex.Release();
+                };
+
+            // Act
+            await Database.Ref("People").Child("dvader").Remove();
+
+            // Assert
+            mutex.WaitOne();
+            Assert.IsTrue(wasCalled);
+        }
+
+        [Test, Timeout(5000)]
+        public void Subscription_TwoOnSamePath_ShouldBeSameReference()
+        {
+            // Act
+            var ref1 = Database.Ref("People").On<Dictionary<string, Person>>();
+            var ref2 = Database.Ref("People").On<Dictionary<string, Person>>();
+
+            // Assert
+            Assert.AreEqual(ref1, ref2);
         }
     }
 }

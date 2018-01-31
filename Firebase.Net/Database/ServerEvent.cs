@@ -8,9 +8,9 @@ namespace Firebase.Net.Database
     {
         public ServerEventType Type { get; private set; }
         public string Path { get; private set; }
-        public JObject Data { get; private set; }
+        public object Data { get; private set; }
 
-        private ServerEvent(ServerEventType eventType, string path, JObject data)
+        private ServerEvent(ServerEventType eventType, string path, object data)
         {
             Type = eventType;
             Path = path;
@@ -23,17 +23,24 @@ namespace Firebase.Net.Database
 
             var type = ToDatabaseEvent(serializedEvent);
 
-            // The data part looks like this: data: { path: "path/to/resource", data: {data: 2, otherData: "helo" }}
             dynamic content = JsonConvert.DeserializeObject(serializedData.Split(new char[] { ':' }, 2)[1]);
+            if (content == null)
+            {
+                return new ServerEvent(type, null, null);
+            }
+            else
+            {
+                // The data part looks like this: data: { path: "path/to/resource", data: {data: 2, otherData: "helo" }}
 
-            // We need to separate the keys with dots instead of slashes.
-            var path = (string)content["path"];
-            path = path?.Replace('/', '.').TrimStart('.');
+                // We need to separate the keys with dots instead of slashes.
+                var path = (string)content["path"];
+                path = path?.Replace('/', '.')?.TrimStart('.');
 
-            // The data is a json object. It is null if we deal with a remove operation.
-            var data = content["data"];
+                // The data is a json object. It is null if we deal with a remove operation.
+                dynamic data = content["data"];
 
-            return new ServerEvent(type, path, data);
+                return new ServerEvent(type, path, data);
+            }
         }
 
         private static ServerEventType ToDatabaseEvent(string eventName)

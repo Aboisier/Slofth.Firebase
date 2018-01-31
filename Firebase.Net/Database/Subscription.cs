@@ -1,12 +1,12 @@
-﻿using Firebase.Net.Http;
-using Firebase.Net.Utils;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using Firebase.Net.Http;
+using Firebase.Net.Utils;
+using System.Collections.Concurrent;
 
 namespace Firebase.Net.Database
 {
@@ -19,29 +19,45 @@ namespace Firebase.Net.Database
 
     public class Subscription<T>
     {
-        //public event DatabaseEventHandler<T> Value;
-        //public event DatabaseEventHandler<T> ChildAdded;
-        //public event DatabaseEventHandler<T> ChildMoved;
-        //public event DatabaseEventHandler<T> ChildChanged;
+        private static ConcurrentDictionary<(Type, string), Subscription<T>> Subscriptions { get; set; }
+
+        public event DatabaseEventHandler<T> ValueChanged;
+        public event DatabaseEventHandler<T> ChildAdded;
+        public event DatabaseEventHandler<T> ChildMoved;
+        public event DatabaseEventHandler<T> ChildChanged;
         public event DatabaseEventHandler<T> ChildRemoved;
 
-        JObject Cache { get; set; }
+        JContainer Cache { get; set; }
 
         private Func<string> IdTokenFactory { get; set; }
         private UrlBuilder UrlBuilder { get; set; }
         private IFirebaseHttpClientFacade Client { get; set; }
 
-        internal Subscription(UrlBuilder urlBuilder, Func<string> idTokenFactory)
+        internal static Subscription<T> Create(UrlBuilder urlBuilder, Func<string> idTokenFactory)
         {
-            UrlBuilder = urlBuilder;
-            IdTokenFactory = idTokenFactory;
+            Subscription<T> subscription;
+            var key = (typeof(T), urlBuilder.Url);
+            if (Subscriptions.TryGetValue(key, out subscription))
+            {
+                return subscription;
+            }
 
-            Client = FirebaseHttpClientFactory.CreateFirebaseDatabaseHttpClient();
-            Client.Timeout = Constants.Timeout;
+            subscription = new Subscription<T>();
+            subscription.UrlBuilder = urlBuilder;
+            subscription.IdTokenFactory = idTokenFactory;
+            subscription.Client = FirebaseHttpClientFactory.CreateFirebaseDatabaseHttpClient();
+            subscription.Client.Timeout = Constants.Timeout;
+            subscription.Cache = new JObject();
 
-            Cache = new JObject();
+            Subscriptions.TryAdd(key, subscription);
 
-            Task.Run(ListenToServerEvents);
+            Task.Run(subscription.ListenToServerEvents);
+            return subscription;
+        }
+
+        static Subscription()
+        {
+            Subscriptions = new ConcurrentDictionary<(Type, string), Subscription<T>>();
         }
 
         private async Task ListenToServerEvents()
@@ -65,41 +81,53 @@ namespace Firebase.Net.Database
                     {
                         // An event sent from the server is built from three lines. The first is the event name, the second one is the data, and third is empty.
                         var eventType = await reader.ReadLineAsync();
-                        if (eventType == null) return;
+                        if (eventType == null || String.IsNullOrWhiteSpace(eventType)) continue;
 
                         string serializedData = await reader.ReadLineAsync();
-                        await reader.ReadLineAsync();
 
                         ServerEvent serverEvent = ServerEvent.Parse(eventType, serializedData);
-
                         if (serverEvent.Type == ServerEventType.AuthRevoked) { break; }
                         if (serverEvent.Type == ServerEventType.KeepAlive) { continue; }
                         if (serverEvent.Type == ServerEventType.Cancel) { throw new PremissionDeniedException(); }
 
-
-                        if (Cache.SelectToken(serverEvent.Path).Parent == null)
-                        {
-                            Cache = serverEvent.Data;
-                        }
-                        else
-                        {
-                            if (serverEvent.Data != null)
-                            {
-                            }
-                            else
-                            {
-                                Cache.SelectToken(serverEvent.Path).Parent.Remove();
-                                ChildRemoved.Invoke(Cache.ToObject<T>());
-                            }
-                        }
+                        UpdateCache(serverEvent);
                     }
                 }
             }
         }
 
-        private void UpdateCache()
+        // Todo : Add comments to this function
+        private void UpdateCache(ServerEvent serverEvent)
         {
+            var token = Cache.SelectToken(serverEvent.Path, false);
+            if (token != null && token.Parent == null)
+            {
+                Cache = serverEvent.Data as JObject;
+            }
+            else
+            {
+                // Todo : Refactor condition
+                if (serverEvent.Path.Split('.').Length > 1 && serverEvent.Data != null && (serverEvent.Data as JObject).Count > 0)
+                {
+                    if (token == null)
+                    {
+                        Cache[serverEvent.Path] = serverEvent.Data as JToken;
+                        ChildAdded?.Invoke(Cache.ToObject<T>());
+                    }
+                    else
+                    {
+                        token.Replace(serverEvent.Data as JToken);
+                        ChildChanged?.Invoke(Cache.ToObject<T>());
+                    }
+                }
+                else
+                {
+                    Cache.SelectToken(serverEvent.Path, false)?.Parent?.Remove();
+                    ChildRemoved?.Invoke(Cache.ToObject<T>());
+                }
+            }
 
+            ValueChanged?.Invoke(Cache.ToObject<T>());
         }
 
         class Constants
