@@ -9,21 +9,21 @@ namespace Firebase.Net.Tests.Http
     [TestFixture]
     class FirebaseErrorHandlingDecoratorTests
     {
-        Mock<IHttpClientFacade> BaseClientMock { get; set; }
+        Mock<IFirebaseHttpClientFacade> BaseClientMock { get; set; }
         Mock<HttpResponseMessage> ResponseMock { get; set; }
         Mock<HttpContent> ContentMock { get; set; }
-        IHttpClientFacade ClientDecorator { get; set; }
+        IFirebaseHttpClientFacade ClientDecorator { get; set; }
 
-        Error Error { get; set; }
+        FirebaseAuthError Error { get; set; }
         bool IsSuccessStatusCode { get; set; }
 
         [SetUp]
         public void SetUp()
         {
-            BaseClientMock = new Mock<IHttpClientFacade>();
+            BaseClientMock = new Mock<IFirebaseHttpClientFacade>();
             ResponseMock = new Mock<HttpResponseMessage>();
             ContentMock = new Mock<HttpContent>();
-            ClientDecorator = new FirebaseErrorHandlingDecorator(BaseClientMock.Object);
+            ClientDecorator = new FirebaseErrorHandlingDecorator<FirebaseAuthError>(BaseClientMock.Object);
 
             // TODO : We're going to have to somehow wrap the content mock, because we can't mock the ReadAsAsync extension method (because it's an extension method).
             // ContentMock.Setup(x => x.ReadAsAsync<Error>()).Returns(() => Task.FromResult(Error));

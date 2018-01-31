@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Firebase.Net.Auth;
+using Newtonsoft.Json;
+using System;
 
 namespace Firebase.Net.Http
 {
-    public class Error
+    internal class FirebaseAuthError : IFirebaseError
     {
         private static class Messages
         {
@@ -26,69 +28,72 @@ namespace Firebase.Net.Http
             public static readonly string FederateUserIdAlreadyLinked = "FEDERATED_USER_ID_ALREADY_LINKED";
         }
 
-        public string code { get; set; }
-        public string message { get; set; }
+        [JsonProperty("code")]
+        public string Code { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
 
         public Exception GetCorrespondingException()
         {
-            if (message == Messages.InvalidRefreshToken)
+            if (Message == Messages.InvalidRefreshToken)
                 return new InvalidRefreshTokenException();
 
-            if (message == Messages.InvalidGrantType)
+            if (Message == Messages.InvalidGrantType)
                 return new InvalidGrantTypeException();
 
-            if (message == Messages.MissingRefreshToken)
+            if (Message == Messages.MissingRefreshToken)
                 return new MissingRefreshTokenException();
 
-            if (message == Messages.EmailExists)
+            if (Message == Messages.EmailExists)
                 return new EmailExistsException();
 
-            if (message == Messages.OperationNotAllowed)
+            if (Message == Messages.OperationNotAllowed)
                 return new OperationNotAllowedException();
 
-            if (message == Messages.TooManyAttempts)
+            if (Message == Messages.TooManyAttempts)
                 return new TooManyAttemptsException();
 
-            if (message == Messages.EmailNotFound)
+            if (Message == Messages.EmailNotFound)
                 return new EmailNotFoundException();
 
-            if (message == Messages.InvalidPassword)
+            if (Message == Messages.InvalidPassword)
                 return new InvalidPasswordException();
 
-            if (message == Messages.UserDisabled)
+            if (Message == Messages.UserDisabled)
                 return new UserDisabledException();
 
-            if (message == Messages.InvalidIdpResponse)
+            if (Message == Messages.InvalidIdpResponse)
                 return new InvalidIdpResponseException();
 
-            if (message == Messages.TooManyAttempts)
+            if (Message == Messages.TooManyAttempts)
                 return new TooManyAttemptsException();
 
-            if (message == Messages.ExpiredOobCode)
+            if (Message == Messages.ExpiredOobCode)
                 return new ExpiredOobCodeException();
 
-            if (message == Messages.InvalidOobCode)
+            if (Message == Messages.InvalidOobCode)
                 return new InvalidOobCodeException();
 
-            if (message == Messages.InvalidIdToken)
+            if (Message == Messages.InvalidIdToken)
                 return new InvalidIdTokenException();
 
-            if (message == Messages.WeakPassword)
+            if (Message == Messages.WeakPassword)
                 return new WeakPasswordException();
 
-            if (message == Messages.UserNotFound)
+            if (Message == Messages.UserNotFound)
                 return new UserNotFoundException();
 
-            if (message == Messages.CredentialTooOld)
+            if (Message == Messages.CredentialTooOld)
                 return new CredentialTooOldException();
 
-            if (message == Messages.TokenExpired)
+            if (Message == Messages.TokenExpired)
                 return new TokenExpiredException();
 
-            if (message == Messages.FederateUserIdAlreadyLinked)
+            if (Message == Messages.FederateUserIdAlreadyLinked)
                 return new FederateUserIdAlreadyLinkedException();
 
-            return new FirebaseException();
+            return new FirebaseAuthException();
         }
     }
 }

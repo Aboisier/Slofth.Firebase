@@ -1,27 +1,44 @@
 ﻿using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace Firebase.Net.Http
 {
-    class HttpClientFacade : IHttpClientFacade
+    class HttpClientFacade : IFirebaseHttpClientFacade
     {
         private HttpClient Client { get; set; }
 
+        public HttpRequestHeaders Headers => Client.DefaultRequestHeaders;
+
+        public TimeSpan Timeout
+        {
+            get => Client.Timeout;
+            set => Client.Timeout = value;
+        }
         public HttpClientFacade()
         {
-            Client = new HttpClient();
+            HttpClientHandler httpClientHandler = new HttpClientHandler();
+            httpClientHandler.AllowAutoRedirect = true;
+            Client = new HttpClient(httpClientHandler, true);
         }
 
         public HttpClientFacade(Uri baseAddress)
         {
-            Client = new HttpClient();
+            HttpClientHandler httpClientHandler = new HttpClientHandler();
+            httpClientHandler.AllowAutoRedirect = true;
+            Client = new HttpClient(httpClientHandler, true);
             Client.BaseAddress = baseAddress;
         }
 
         public HttpClientFacade(HttpClient client)
         {
             Client = client;
+        }
+
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, HttpCompletionOption completionOption)
+        {
+            return await Client.SendAsync(request, completionOption);
         }
 
         public async Task<HttpResponseMessage> PostAsJsonAsync<T>(string url, T value)
