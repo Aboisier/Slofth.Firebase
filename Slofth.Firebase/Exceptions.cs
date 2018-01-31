@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Firebase.Net
+namespace Slofth.Firebase
 {
     public class FirebaseException : Exception
     {

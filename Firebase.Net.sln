@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Firebase.Net", "Firebase.Net\Firebase.Net.csproj", "{D998035E-F065-41A7-8CB7-FBA4217AFCA7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slofth.Firebase", "Slofth.Firebase\Slofth.Firebase.csproj", "{D998035E-F065-41A7-8CB7-FBA4217AFCA7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Firebase.Net.Tests", "Firebase.Net.Tests\Firebase.Net.Tests.csproj", "{E5253AFC-9785-445B-A633-594CE89FC25F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slofth.Firebase.Tests", "Slofth.Firebase.Tests\Slofth.Firebase.Tests.csproj", "{E5253AFC-9785-445B-A633-594CE89FC25F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

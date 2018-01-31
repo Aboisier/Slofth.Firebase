@@ -1,7 +1,7 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Firebase.Net.Http
+namespace Slofth.Firebase.Http
 {
     public interface IHttpClientFacade
     {

@@ -3,8 +3,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Firebase.Net.Tests")]
-namespace Firebase.Net.Http
+[assembly: InternalsVisibleTo("Slofth.Firebase.Tests")]
+namespace Slofth.Firebase.Http
 {
     class FirebaseErrorHandlingDecorator : HttpClientDecorator
     {
