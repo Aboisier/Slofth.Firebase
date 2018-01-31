@@ -1,4 +1,4 @@
-﻿using Firebase.Net.Http;
+﻿using Slofth.Firebase.Http;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Firebase.Net.Tests.Http
+namespace Slofth.Firebase.Tests.Http
 {
     [TestFixture]
     class ErrorTests

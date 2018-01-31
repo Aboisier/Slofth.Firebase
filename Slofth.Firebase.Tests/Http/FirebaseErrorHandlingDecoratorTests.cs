@@ -1,10 +1,10 @@
-﻿using Firebase.Net.Http;
+﻿using Slofth.Firebase.Http;
 using Moq;
 using NUnit.Framework;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Firebase.Net.Tests.Http
+namespace Slofth.Firebase.Tests.Http
 {
     [TestFixture]
     class FirebaseErrorHandlingDecoratorTests

@@ -1,4 +1,4 @@
-﻿namespace Firebase.Net.Http
+﻿namespace Slofth.Firebase.Http
 {
     class HttpClientFactory
     {
