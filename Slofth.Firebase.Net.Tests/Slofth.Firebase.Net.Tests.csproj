@@ -93,7 +93,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Firebase.Net\Slofth.Firebase.Net.csproj">
+    <ProjectReference Include="..\Slofth.Firebase.Net\Slofth.Firebase.Net.csproj">
       <Project>{d998035e-f065-41a7-8cb7-fba4217afca7}</Project>
       <Name>Slofth.Firebase.Net</Name>
     </ProjectReference>
