@@ -28,7 +28,7 @@ namespace Firebase.Net.Database
         public event DatabaseEventHandler<T> ChildChanged;
         public event DatabaseEventHandler<T> ChildRemoved;
 
-        JContainer Cache { get; set; }
+        private JContainer Cache { get; set; }
 
         private Func<string> IdTokenFactory { get; set; }
         private UrlBuilder UrlBuilder { get; set; }
