@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>d998035e-f065-41a7-8cb7-fba4217afca7</id>
+    <version>0.0.1.0</version>
+    <title>Slofth.Firebase.Net</title>
+    <authors>Slofth</authors>
+    <owners>Aboisier</owners>
+    <licenseUrl>https://github.com/Aboisier/Firebase.Net/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/Aboisier/Firebase.Net/</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>Wrapper for Firebase's api.</description>
+    <releaseNotes>Initial commit.</releaseNotes>
+    <copyright>Copyright 2018</copyright>
+    <tags></tags>
+  </metadata>
+</package>
