@@ -65,42 +65,35 @@ namespace Firebase.Net.Database
         {
             UrlBuilder.AppendToPath(Endpoints.Json);
 
-            try
+            while (true)
             {
-                while (true)
+                var urlBuilderCopy = UrlBuilder.Copy();
+                urlBuilderCopy.AddParam(Params.Auth, IdTokenFactory());
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(urlBuilderCopy.Url));
+                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
+
+                HttpResponseMessage response = await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+                using (Stream stream = await response.Content.ReadAsStreamAsync())
+                using (StreamReader reader = new StreamReader(stream))
                 {
-                    var urlBuilderCopy = UrlBuilder.Copy();
-                    urlBuilderCopy.AddParam(Params.Auth, IdTokenFactory());
-
-                    HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(urlBuilderCopy.Url));
-                    request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-
-                    HttpResponseMessage response = await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-
-                    using (Stream stream = await response.Content.ReadAsStreamAsync())
-                    using (StreamReader reader = new StreamReader(stream))
+                    while (true)
                     {
-                        while (true)
-                        {
-                            // An event sent from the server is built from three lines. The first is the event name, the second one is the data, and third is empty.
-                            var eventType = await reader.ReadLineAsync();
-                            if (eventType == null || String.IsNullOrWhiteSpace(eventType)) continue;
+                        // An event sent from the server is built from three lines. The first is the event name, the second one is the data, and third is empty.
+                        var eventType = await reader.ReadLineAsync();
+                        if (eventType == null || String.IsNullOrWhiteSpace(eventType)) continue;
 
-                            string serializedData = await reader.ReadLineAsync();
+                        string serializedData = await reader.ReadLineAsync();
 
-                            ServerEvent serverEvent = ServerEvent.Parse(eventType, serializedData);
-                            if (serverEvent.Type == ServerEventType.AuthRevoked) { break; }
-                            if (serverEvent.Type == ServerEventType.KeepAlive) { continue; }
-                            if (serverEvent.Type == ServerEventType.Cancel) { throw new PremissionDeniedException(); }
+                        ServerEvent serverEvent = ServerEvent.Parse(eventType, serializedData);
+                        if (serverEvent.Type == ServerEventType.AuthRevoked) { break; }
+                        if (serverEvent.Type == ServerEventType.KeepAlive) { continue; }
+                        if (serverEvent.Type == ServerEventType.Cancel) { throw new PremissionDeniedException(); }
 
-                            UpdateCache(serverEvent);
-                        }
+                        UpdateCache(serverEvent);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-
             }
         }
 
