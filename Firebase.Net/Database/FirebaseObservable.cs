@@ -134,7 +134,7 @@ namespace Firebase.Net.Database
 
         class Constants
         {
-            public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(600);
+            public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5200);
         }
 
         class Endpoints
