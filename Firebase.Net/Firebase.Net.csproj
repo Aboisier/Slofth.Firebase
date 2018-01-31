@@ -61,7 +61,7 @@
     <Compile Include="Database\ChildQuery.cs" />
     <Compile Include="Auth\FirebaseAuthExceptions.cs" />
     <Compile Include="Database\ServerEvent.cs" />
-    <Compile Include="Database\Subscription.cs" />
+    <Compile Include="Database\FirebaseObservable.cs" />
     <Compile Include="FirebaseException.cs" />
     <Compile Include="Http\FirebaseDatabaseError.cs" />
     <Compile Include="Http\IFirebaseError.cs" />

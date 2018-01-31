@@ -88,6 +88,9 @@
     <Content Include="TestData\Rules\DenyEverything.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="TestData\Database\Array.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Firebase.Net\Firebase.Net.csproj">

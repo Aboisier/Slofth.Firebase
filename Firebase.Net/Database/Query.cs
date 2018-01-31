@@ -14,7 +14,7 @@ namespace Firebase.Net.Database
 {
     public abstract partial class Query
     {
-        private static ConcurrentDictionary<(Type, string), Subscription<object>> Subscriptions { get; set; }
+        private static ConcurrentDictionary<(Type, string), FirebaseObservable<object>> Subscriptions { get; set; }
 
         internal IFirebaseHttpClientFacade Client { get; set; }
         internal UrlBuilder UrlBuilder { get; set; }
@@ -32,7 +32,7 @@ namespace Firebase.Net.Database
 
         static Query()
         {
-            Subscriptions = new ConcurrentDictionary<(Type, string), Subscription<object>>();
+            Subscriptions = new ConcurrentDictionary<(Type, string), FirebaseObservable<object>>();
         }
 
         /// <summary>
@@ -54,9 +54,9 @@ namespace Firebase.Net.Database
             return default(T);
         }
 
-        public virtual Subscription<T> On<T>()
+        public virtual FirebaseObservable<T> On<T>()
         {
-            return Subscription<T>.Create(UrlBuilder, IdTokenFactory);
+            return FirebaseObservable<T>.Create(UrlBuilder, IdTokenFactory);
         }
 
         /// <summary>

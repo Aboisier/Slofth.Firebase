@@ -5,8 +5,12 @@ using System.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
 
+
+
 namespace PolyPaint.Tests.Services
 {
+    using PeopleMap = Dictionary<string, Person>;
+
     [TestFixture]
     class FirebaseDatabaseServiceTests
     {
@@ -40,7 +44,7 @@ namespace PolyPaint.Tests.Services
 
             // Act
             var actual = await Database.Ref("People")
-                                       .Once<Dictionary<string, Person>>();
+                                       .Once<PeopleMap>();
 
             // Assert
             Assert.AreEqual(8, actual.Keys.Count);
@@ -168,7 +172,7 @@ namespace PolyPaint.Tests.Services
             var result = await Database.Ref("People")
                                        .OrderBy("Age")
                                        .LimitToFirst(2)
-                                       .Once<Dictionary<string, Person>>();
+                                       .Once<PeopleMap>();
 
             // Assert
             Assert.IsTrue(result.ContainsKey("jbond"));
@@ -183,7 +187,7 @@ namespace PolyPaint.Tests.Services
             var result = await Database.Ref("People")
                                        .OrderBy("Age")
                                        .LimitToLast(2)
-                                       .Once<Dictionary<string, Person>>();
+                                       .Once<PeopleMap>();
 
             // Assert
             Assert.IsTrue(result.ContainsKey("dvader"));
@@ -198,7 +202,7 @@ namespace PolyPaint.Tests.Services
             var result = await Database.Ref("People")
                                        .OrderBy("Age")
                                        .StartAt(100)
-                                       .Once<Dictionary<string, Person>>();
+                                       .Once<PeopleMap>();
 
             // Assert
             Assert.IsTrue(result.ContainsKey("dvader"));
@@ -213,7 +217,7 @@ namespace PolyPaint.Tests.Services
             var result = await Database.Ref("People")
                                        .OrderBy("Age")
                                        .EndAt(25)
-                                       .Once<Dictionary<string, Person>>();
+                                       .Once<PeopleMap>();
 
             // Assert
             Assert.IsTrue(result.ContainsKey("jbond"));
@@ -229,7 +233,7 @@ namespace PolyPaint.Tests.Services
             var result = await Database.Ref("People")
                                        .OrderByKey()
                                        .EndAt("jbond")
-                                       .Once<Dictionary<string, Person>>();
+                                       .Once<PeopleMap>();
 
             // Assert
             Assert.IsTrue(result.ContainsKey("dvader"));
@@ -244,7 +248,7 @@ namespace PolyPaint.Tests.Services
             var result = await Database.Ref("People")
                                        .OrderByKey()
                                        .EqualTo("jbond")
-                                       .Once<Dictionary<string, Person>>();
+                                       .Once<PeopleMap>();
 
             // Assert
             Assert.IsTrue(result.ContainsKey("jbond"));
@@ -259,7 +263,7 @@ namespace PolyPaint.Tests.Services
             await FirebaseHelper.UpdateRules("DenyEverything.json");
 
             // Act & Assert
-            Assert.That(async () => await UnauthenticatedDatabase.Ref("People").Once<Dictionary<string, Person>>(), Throws.Exception.InstanceOf<CouldNotParseAuthTokenException>());
+            Assert.That(async () => await UnauthenticatedDatabase.Ref("People").Once<PeopleMap>(), Throws.Exception.InstanceOf<CouldNotParseAuthTokenException>());
         }
 
         [Test]
@@ -270,94 +274,139 @@ namespace PolyPaint.Tests.Services
             await FirebaseHelper.UpdateRules("DenyEverything.json");
 
             // Act & Assert
-            Assert.That(async () => await UnauthenticatedDatabase.Ref("People").Once<Dictionary<string, Person>>(), Throws.Exception.InstanceOf<CouldNotParseAuthTokenException>());
+            Assert.That(async () => await UnauthenticatedDatabase.Ref("People").Once<PeopleMap>(), Throws.Exception.InstanceOf<CouldNotParseAuthTokenException>());
         }
 
         [Test, Timeout(5000)]
         public async Task Subscription_ChildAdded_ShouldCallEvent()
         {
             // Arrange
-            Semaphore mutex = new Semaphore(0, 1);
-            bool wasCalled = false;
+            Semaphore semaphore = new Semaphore(0, 2);
+            bool wasValueChangedCalled = false;
+            bool wasChildAddedCalled = false;
 
-            Database
-                .Ref("People")
-                .On<Dictionary<string, Person>>()
-                .ChildAdded += (Dictionary<string, Person> people) =>
+            DatabaseEventHandler<PeopleMap> onChildAdded = (PeopleMap people) =>
             {
-                wasCalled = true;
+                wasChildAddedCalled = true;
                 Assert.AreEqual(9, people.Count);
-                mutex.Release();
+                semaphore.Release();
             };
+
+            DatabaseEventHandler<PeopleMap> onValueChanged = (PeopleMap people) =>
+            {
+                wasValueChangedCalled = true;
+                semaphore.Release();
+            };
+
+            Database.Ref("People").On<PeopleMap>().ValueChanged += onValueChanged;
+            Database.Ref("People").On<PeopleMap>().ChildAdded += onChildAdded;
 
             // Act
             await Database.Ref("People").Child("ttesterson").Set(new Person("Testy Testerson", 43, "Testing."));
 
             // Assert
-            mutex.WaitOne();
-            Assert.IsTrue(wasCalled);
+            semaphore.WaitOne();
+            semaphore.WaitOne();
+            Assert.IsTrue(wasValueChangedCalled);
+            Assert.IsTrue(wasChildAddedCalled);
 
+            // Teardown
+            Database.Ref("People").On<PeopleMap>().ValueChanged -= onValueChanged;
+            Database.Ref("People").On<PeopleMap>().ChildAdded -= onChildAdded;
         }
 
         [Test, Timeout(5000)]
         public async Task Subscription_ChildChanged_ShouldCallEvent()
         {
             // Arrange
-            Semaphore mutex = new Semaphore(0, 1);
+            Semaphore semaphore = new Semaphore(0, 1);
             bool wasCalled = false;
 
-            Database
-                .Ref("People")
-                .On<Dictionary<string, Person>>()
-                .ChildChanged += (Dictionary<string, Person> people) =>
-                {
-                    Assert.AreEqual(20, people["dvader"].Age);
-                    wasCalled = true;
-                    mutex.Release();
-                };
+            DatabaseEventHandler<PeopleMap> onChildChanged = (PeopleMap people) =>
+            {
+                Assert.AreEqual(20, people["dvader"].Age);
+                wasCalled = true;
+                semaphore.Release();
+            };
+
+            Database.Ref("People").On<PeopleMap>().ChildChanged += onChildChanged;
 
             // Act
             await Database.Ref("People").Child("dvader").Child("Age").Set(20);
 
             // Assert
-            mutex.WaitOne();
+            semaphore.WaitOne();
             Assert.IsTrue(wasCalled);
+
+            // Teardown 
+            Database.Ref("People").On<PeopleMap>().ChildChanged -= onChildChanged;
         }
 
-        [Test, Timeout(5000000)]
+        [Test, Timeout(5000)]
         public async Task Subscription_ChildRemoved_ShouldCallEvent()
         {
             // Arrange
-            Semaphore mutex = new Semaphore(0, 1);
-            bool wasCalled = false;
+            Semaphore semaphore = new Semaphore(0, 1);
+            bool wasChildRemovedCalled = false;
+            DatabaseEventHandler<PeopleMap> onChildRemoved = (PeopleMap people) =>
+            {
+                Assert.AreEqual(7, people.Count);
+                wasChildRemovedCalled = true;
+                semaphore.Release();
+            };
 
-            Database
-                .Ref("People")
-                .On<Dictionary<string, Person>>()
-                .ChildRemoved += (Dictionary<string, Person> people) =>
-                {
-                    Assert.AreEqual(7, people.Count);
-                    wasCalled = true;
-                    mutex.Release();
-                };
+            Database.Ref("People").On<PeopleMap>().ChildRemoved += onChildRemoved;
 
             // Act
             await Database.Ref("People").Child("dvader").Remove();
 
             // Assert
-            mutex.WaitOne();
-            Assert.IsTrue(wasCalled);
+            semaphore.WaitOne();
+            Assert.IsTrue(wasChildRemovedCalled);
+
+            // Teardown
+            Database.Ref("People").On<PeopleMap>().ChildRemoved -= onChildRemoved;
         }
 
         [Test, Timeout(5000)]
         public void Subscription_TwoOnSamePath_ShouldBeSameReference()
         {
             // Act
-            var ref1 = Database.Ref("People").On<Dictionary<string, Person>>();
-            var ref2 = Database.Ref("People").On<Dictionary<string, Person>>();
+            var ref1 = Database.Ref("People").On<PeopleMap>();
+            var ref2 = Database.Ref("People").On<PeopleMap>();
 
             // Assert
             Assert.AreEqual(ref1, ref2);
+        }
+
+        [Test]
+        public async Task Once_StringArray_ShouldDeserializeIntoList()
+        {
+            // Arrange
+            await FirebaseHelper.ImportDatabase("Array.json");
+
+            // Act
+            var list = await Database.Ref("Array").Once<List<string>>();
+
+            // Assert
+            Assert.AreEqual("Helo", list[0]);
+            Assert.AreEqual("Hey", list[1]);
+            Assert.AreEqual("Bonjourno", list[2]);
+            Assert.AreEqual("Hola", list[3]);
+        }
+
+        [Test]
+        public async Task Set_StringArray_ShouldDeserializeIntoList()
+        {
+            // Act
+            await Database.Ref("Array").Set(new string[] { "Helo", "Hey", "Bonjourno", "Hola" });
+
+            // Assert
+            var list = await Database.Ref("Array").Once<List<string>>();
+            Assert.AreEqual("Helo", list[0]);
+            Assert.AreEqual("Hey", list[1]);
+            Assert.AreEqual("Bonjourno", list[2]);
+            Assert.AreEqual("Hola", list[3]);
         }
     }
 }

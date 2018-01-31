@@ -8,9 +8,9 @@ namespace Firebase.Net.Database
     {
         public ServerEventType Type { get; private set; }
         public string Path { get; private set; }
-        public object Data { get; private set; }
+        public JToken Data { get; private set; }
 
-        private ServerEvent(ServerEventType eventType, string path, object data)
+        private ServerEvent(ServerEventType eventType, string path, JToken data)
         {
             Type = eventType;
             Path = path;
@@ -23,7 +23,7 @@ namespace Firebase.Net.Database
 
             var type = ToDatabaseEvent(serializedEvent);
 
-            dynamic content = JsonConvert.DeserializeObject(serializedData.Split(new char[] { ':' }, 2)[1]);
+            PathDataPair content = JsonConvert.DeserializeObject<PathDataPair>(serializedData.Split(new char[] { ':' }, 2)[1]);
             if (content == null)
             {
                 return new ServerEvent(type, null, null);
@@ -33,13 +33,9 @@ namespace Firebase.Net.Database
                 // The data part looks like this: data: { path: "path/to/resource", data: {data: 2, otherData: "helo" }}
 
                 // We need to separate the keys with dots instead of slashes.
-                var path = (string)content["path"];
-                path = path?.Replace('/', '.')?.TrimStart('.');
-
                 // The data is a json object. It is null if we deal with a remove operation.
-                dynamic data = content["data"];
 
-                return new ServerEvent(type, path, data);
+                return new ServerEvent(type, content.Path, content.Data);
             }
         }
 
@@ -68,5 +64,25 @@ namespace Firebase.Net.Database
                     throw new UnknownServerEventException();
             }
         }
+    }
+
+    class PathDataPair
+    {
+        private string path;
+        [JsonProperty("path")]
+        public string Path
+        {
+            get
+            {
+                return path;
+            }
+            set
+            {
+                path = value?.Replace('/', '.')?.TrimStart('.');
+            }
+        }
+
+        [JsonProperty("data")]
+        public JToken Data { get; set; }
     }
 }
