@@ -50,10 +50,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Database\FirebaseDatabaseEvent.cs" />
     <Compile Include="Database\FirebaseDatabaseExceptions.cs" />
     <Compile Include="Database\PostInfo.cs" />
     <Compile Include="Database\Query.cs" />
-    <Compile Include="Database\Database.cs" />
+    <Compile Include="Database\FirebaseDatabase.cs" />
     <Compile Include="Database\FilterQuery.cs" />
     <Compile Include="Database\ChildQuery.cs" />
     <Compile Include="Auth\FirebaseAuthExceptions.cs" />

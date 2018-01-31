@@ -1,22 +1,18 @@
 ﻿using Slofth.Firebase.Http;
 using Slofth.Firebase.Utils;
 using System;
+using System.Threading.Tasks;
 
 namespace Slofth.Firebase.Database
 {
-    public enum DatabaseEvent
+    public class FirebaseDatabase
     {
-        Value, ChildAdded, ChildChanged, ChildRemoved, ChildMoved
-    }
-
-    public class Database
-    {
-        private Func<string> TokenIdFactory { get; set; }
+        private Func<Task<string>> TokenIdFactory { get; set; }
 
         private IFirebaseHttpClientFacade Client { get; set; }
         private string DatabaseUrl { get; set; }
 
-        public Database(string databaseUrl, Func<string> tokenIdFactory)
+        public FirebaseDatabase(string databaseUrl, Func<Task<string>> tokenIdFactory)
         {
             DatabaseUrl = databaseUrl;
             TokenIdFactory = tokenIdFactory;
@@ -29,7 +25,7 @@ namespace Slofth.Firebase.Database
             var builder = UrlBuilder
                 .Create(DatabaseUrl)
                 .AppendToPath(name);
-             
+
             return new ChildQuery(builder, name, TokenIdFactory);
         }
     }

@@ -30,11 +30,11 @@ namespace Slofth.Firebase.Database
 
         private JContainer Cache { get; set; }
 
-        private Func<string> IdTokenFactory { get; set; }
+        private Func<Task<string>> IdTokenFactory { get; set; }
         private UrlBuilder UrlBuilder { get; set; }
         private IFirebaseHttpClientFacade Client { get; set; }
 
-        internal static FirebaseObservable<T> Create(UrlBuilder urlBuilder, Func<string> idTokenFactory)
+        internal static FirebaseObservable<T> Create(UrlBuilder urlBuilder, Func<Task<string>> idTokenFactory)
         {
             FirebaseObservable<T> subscription;
             var key = (typeof(T), urlBuilder.Url);
@@ -68,7 +68,7 @@ namespace Slofth.Firebase.Database
             while (true)
             {
                 var urlBuilderCopy = UrlBuilder.Copy();
-                urlBuilderCopy.AddParam(Params.Auth, IdTokenFactory());
+                urlBuilderCopy.AddParam(Params.Auth, await IdTokenFactory());
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(urlBuilderCopy.Url));
                 request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));

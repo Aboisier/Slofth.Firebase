@@ -18,11 +18,11 @@ namespace Slofth.Firebase.Database
 
         internal IFirebaseHttpClientFacade Client { get; set; }
         internal UrlBuilder UrlBuilder { get; set; }
-        protected Func<string> IdTokenFactory { get; set; }
+        protected Func<Task<string>> IdTokenFactory { get; set; }
 
         public string Key { get; private set; }
 
-        internal Query(UrlBuilder urlBuilder, string name, Func<string> idTokenFactory)
+        internal Query(UrlBuilder urlBuilder, string name, Func<Task<string>> idTokenFactory)
         {
             UrlBuilder = urlBuilder;
             Key = name;
@@ -42,7 +42,7 @@ namespace Slofth.Firebase.Database
         /// <returns>The deserialized data.</returns>
         public async virtual Task<T> Once<T>()
         {
-            UrlBuilder.AppendToPath(Endpoints.Json).AddParam(Params.Auth, IdTokenFactory());
+            UrlBuilder.AppendToPath(Endpoints.Json).AddParam(Params.Auth, await IdTokenFactory());
             var response = await Client.GetAsync(UrlBuilder.Url);
 
             try
@@ -64,7 +64,7 @@ namespace Slofth.Firebase.Database
         /// </summary>
         public async Task Set<T>(T value)
         {
-            UrlBuilder.AppendToPath(Endpoints.Json).AddParam(Params.Auth, IdTokenFactory());
+            UrlBuilder.AppendToPath(Endpoints.Json).AddParam(Params.Auth, await IdTokenFactory());
             var response = await Client.PutAsJsonAsync(UrlBuilder.Url, value);
         }
 
@@ -75,7 +75,7 @@ namespace Slofth.Firebase.Database
 
         public async Task<ChildQuery> Push()
         {
-            var builderCopy = UrlBuilder.Copy().AppendToPath(Endpoints.Json).AddParam(Params.Auth, IdTokenFactory());
+            var builderCopy = UrlBuilder.Copy().AppendToPath(Endpoints.Json).AddParam(Params.Auth, await IdTokenFactory());
             var response = await Client.PostAsJsonAsync(builderCopy.Url, new { });
 
             var content = await response.Content.ReadAsAsync<PostInfo>();
@@ -88,7 +88,7 @@ namespace Slofth.Firebase.Database
         /// <returns></returns>
         public async Task Remove()
         {
-            UrlBuilder.AppendToPath(Endpoints.Json).AddParam(Params.Auth, IdTokenFactory());
+            UrlBuilder.AppendToPath(Endpoints.Json).AddParam(Params.Auth, await IdTokenFactory());
             var response = await Client.DeleteAsync(UrlBuilder.Url);
         }
 
@@ -97,12 +97,12 @@ namespace Slofth.Firebase.Database
             return $"\"{text}\"";
         }
 
-        class Endpoints
+        static class Endpoints
         {
             public static readonly string Json = ".json";
         }
 
-        class Params
+        static class Params
         {
             public static readonly string Auth = "auth";
         }

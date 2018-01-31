@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Slofth.Firebase</id>
-    <version>0.0.2.0</version>
+    <version>0.0.2-alpha</version>
     <title>Wrapper for Firebase, by Slofth.</title>
     <authors>Slofth</authors>
     <owners>Aboisier</owners>

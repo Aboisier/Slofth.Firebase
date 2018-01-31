@@ -15,7 +15,7 @@ namespace PolyPaint.Tests.Services
     class FirebaseDatabaseServiceTests
     {
         private FirebaseHelper FirebaseHelper { get; set; }
-        private Database Database { get; set; }
+        private FirebaseDatabase Database { get; set; }
 
         private string DatabaseUrl => ConfigurationManager.AppSettings.Get("DatabaseUrl");
         private string DatabaseSecret => ConfigurationManager.AppSettings.Get("DatabaseSecret");
@@ -24,7 +24,7 @@ namespace PolyPaint.Tests.Services
         public async Task SetUp()
         {
             FirebaseHelper = new FirebaseHelper();
-            Database = new Database(DatabaseUrl, () => DatabaseSecret);
+            Database = new FirebaseDatabase(DatabaseUrl, () => Task.FromResult(DatabaseSecret));
             await FirebaseHelper.UpdateRules("AllowEverything.json");
             await FirebaseHelper.ImportDatabase("People.json");
         }
@@ -259,7 +259,7 @@ namespace PolyPaint.Tests.Services
         public async Task Once_InvalidTokenType_ShouldThrowCouldNotParseAuthTokenException()
         {
             // Arrange
-            Database UnauthenticatedDatabase = new Database(DatabaseUrl, () => "dummy_token");
+            FirebaseDatabase UnauthenticatedDatabase = new FirebaseDatabase(DatabaseUrl, () => Task.FromResult("dummy_token"));
             await FirebaseHelper.UpdateRules("DenyEverything.json");
 
             // Act & Assert
@@ -270,7 +270,7 @@ namespace PolyPaint.Tests.Services
         public async Task Once_InvalidToken_ShouldThrowCouldNotParseAuthTokenException()
         {
             // Arrange
-            Database UnauthenticatedDatabase = new Database(DatabaseUrl, () => "2K7qdbC2X9nQNRzlqQC14XmsGPR6Y5phUfxC2B5Z");
+            FirebaseDatabase UnauthenticatedDatabase = new FirebaseDatabase(DatabaseUrl, () => Task.FromResult("2K7qdbC2X9nQNRzlqQC14XmsGPR6Y5phUfxC2B5Z"));
             await FirebaseHelper.UpdateRules("DenyEverything.json");
 
             // Act & Assert

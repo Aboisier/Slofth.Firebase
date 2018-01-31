@@ -1,11 +1,12 @@
 ﻿using Slofth.Firebase.Utils;
 using System;
+using System.Threading.Tasks;
 
 namespace Slofth.Firebase.Database
 {
     public class ChildQuery : Query
     {
-        internal ChildQuery(UrlBuilder builder, string name, Func<string> idTokenFactory)
+        internal ChildQuery(UrlBuilder builder, string name, Func<Task<string>> idTokenFactory)
             : base(builder, name, idTokenFactory)
         { }
 
