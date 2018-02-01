@@ -80,13 +80,12 @@ namespace Slofth.Firebase.Database
                 {
                     while (true)
                     {
-                        // An event sent from the server is built from three lines. The first is the event name, the second one is the data, and third is empty.
-                        var eventType = await reader.ReadLineAsync();
-                        if (eventType == null || String.IsNullOrWhiteSpace(eventType)) continue;
+                        var serializedEventType = await reader.ReadLineAsync();
+                        if (String.IsNullOrWhiteSpace(serializedEventType)) continue;
 
                         string serializedData = await reader.ReadLineAsync();
 
-                        ServerEvent serverEvent = ServerEvent.Parse(eventType, serializedData);
+                        ServerEvent serverEvent = ServerEvent.Parse(serializedEventType, serializedData);
                         if (serverEvent.Type == ServerEventType.AuthRevoked) { break; }
                         if (serverEvent.Type == ServerEventType.KeepAlive) { continue; }
                         if (serverEvent.Type == ServerEventType.Cancel) { throw new PremissionDeniedException(); }
@@ -107,8 +106,6 @@ namespace Slofth.Firebase.Database
             }
             else
             {
-                //if (serverEvent.Data != null)
-                //{
                 if (token == null)
                 {
                     Cache[serverEvent.Path] = serverEvent.Data as JToken;
@@ -134,6 +131,7 @@ namespace Slofth.Firebase.Database
 
         class Constants
         {
+            // TODO : Arbitrarily long timeout; we don't want the connection. 
             public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5200);
         }
 
