@@ -2,20 +2,13 @@
 using Slofth.Firebase.Utils;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Concurrent;
-using System.IO;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
-
 
 namespace Slofth.Firebase.Database
 {
     public abstract partial class Query
     {
-        private static ConcurrentDictionary<(Type, string), FirebaseObservable<object>> Subscriptions { get; set; }
-
         internal IFirebaseHttpClientFacade Client { get; set; }
         internal UrlBuilder UrlBuilder { get; set; }
         protected Func<Task<string>> IdTokenFactory { get; set; }
@@ -28,11 +21,6 @@ namespace Slofth.Firebase.Database
             Key = name;
             IdTokenFactory = idTokenFactory;
             Client = FirebaseHttpClientFactory.CreateFirebaseDatabaseHttpClient();
-        }
-
-        static Query()
-        {
-            Subscriptions = new ConcurrentDictionary<(Type, string), FirebaseObservable<object>>();
         }
 
         /// <summary>
@@ -54,9 +42,24 @@ namespace Slofth.Firebase.Database
             return default(T);
         }
 
-        public virtual FirebaseObservable<T> On<T>()
+        public virtual Subscription OnChildAdded<T>(Action<T> callback)
         {
-            return FirebaseObservable<T>.Create(UrlBuilder, IdTokenFactory);
+            return FirebaseObservable.ListenChildAdded(UrlBuilder, IdTokenFactory, callback);
+        }
+
+        public virtual Subscription OnChildChanged<T>(Action<T> callback)
+        {
+            return FirebaseObservable.ListenChildChanged(UrlBuilder, IdTokenFactory, callback);
+        }
+
+        public virtual Subscription OnChildRemoved<T>(Action<T> callback)
+        {
+            return FirebaseObservable.ListenChildRemoved<T>(UrlBuilder, IdTokenFactory, callback);
+        }
+
+        public virtual Subscription OnValue<T>(Action<T> callback)
+        {
+            return FirebaseObservable.ListenValue(UrlBuilder, IdTokenFactory, callback);
         }
 
         /// <summary>

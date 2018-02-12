@@ -2,12 +2,12 @@
 <package >
   <metadata>
     <id>Slofth.Firebase</id>
-    <version>0.0.2-alpha</version>
+    <version>0.0.3-alpha</version>
     <title>Wrapper for Firebase, by Slofth.</title>
     <authors>Slofth</authors>
     <owners>Aboisier</owners>
-    <licenseUrl>https://github.com/Aboisier/Firebase.Net/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/Aboisier/Firebase.Net/</projectUrl>
+    <licenseUrl>https://github.com/Aboisier/Slofth.Firebase/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/Aboisier/Slofth.Firebase</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>Wrapper for Firebase, by Slofth</description>
     <releaseNotes>Initial commit.</releaseNotes>

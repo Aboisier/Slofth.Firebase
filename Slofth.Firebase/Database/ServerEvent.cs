@@ -8,6 +8,7 @@ namespace Slofth.Firebase.Database
     {
         public ServerEventType Type { get; private set; }
         public string Path { get; private set; }
+        public string ChildKey => String.IsNullOrEmpty(Path) ? "" : Path.Split('.')[0];
         public JToken Data { get; private set; }
 
         private ServerEvent(ServerEventType eventType, string path, JToken data)

@@ -7,26 +7,28 @@ using Newtonsoft.Json.Linq;
 using Slofth.Firebase.Http;
 using Slofth.Firebase.Utils;
 using System.Collections.Concurrent;
+using System.Threading;
 
 namespace Slofth.Firebase.Database
 {
-    public delegate void DatabaseEventHandler<T>(T obj);
+    public delegate void DatabaseEventHandler(JToken o);
 
     internal enum ServerEventType
     {
         Put, Patch, KeepAlive, Cancel, AuthRevoked
     }
 
-    public class FirebaseObservable<T>
+    public class FirebaseObservable
     {
-        private static ConcurrentDictionary<(Type, string), FirebaseObservable<T>> Subscriptions { get; set; }
+        private CancellationTokenSource CancellationTokenSource { get; set; } = new CancellationTokenSource();
+        private CancellationToken CancellationToken { get; set; }
 
         // TODO : Handle ChildMoved event
         // public event DatabaseEventHandler<T> ChildMoved; 
-        public event DatabaseEventHandler<T> ValueChanged;
-        public event DatabaseEventHandler<T> ChildAdded;
-        public event DatabaseEventHandler<T> ChildChanged;
-        public event DatabaseEventHandler<T> ChildRemoved;
+        private event DatabaseEventHandler ValueChanged;
+        private event DatabaseEventHandler ChildAdded;
+        private event DatabaseEventHandler ChildChanged;
+        private event DatabaseEventHandler ChildRemoved;
 
         private JContainer Cache { get; set; }
 
@@ -34,38 +36,68 @@ namespace Slofth.Firebase.Database
         private UrlBuilder UrlBuilder { get; set; }
         private IFirebaseHttpClientFacade Client { get; set; }
 
-        internal static FirebaseObservable<T> Create(UrlBuilder urlBuilder, Func<Task<string>> idTokenFactory)
+        private static FirebaseObservable Create(UrlBuilder urlBuilder, Func<Task<string>> idTokenFactory)
         {
-            FirebaseObservable<T> subscription;
-            var key = (typeof(T), urlBuilder.Url);
-            if (Subscriptions.TryGetValue(key, out subscription))
-            {
-                return subscription;
-            }
+            FirebaseObservable subscription;
 
-            subscription = new FirebaseObservable<T>();
+            subscription = new FirebaseObservable();
             subscription.UrlBuilder = urlBuilder;
             subscription.IdTokenFactory = idTokenFactory;
             subscription.Client = FirebaseHttpClientFactory.CreateFirebaseDatabaseHttpClient();
             subscription.Client.Timeout = Constants.Timeout;
             subscription.Cache = new JObject();
 
-            Subscriptions.TryAdd(key, subscription);
-
-            Task.Run(subscription.ListenToServerEvents);
             return subscription;
         }
 
-        static FirebaseObservable()
+        internal static Subscription ListenChildAdded<T>(UrlBuilder urlBuilder, Func<Task<string>> idTokenFactory, Action<T> callback)
         {
-            Subscriptions = new ConcurrentDictionary<(Type, string), FirebaseObservable<T>>();
+            var observable = Create(urlBuilder, idTokenFactory);
+            observable.ChildAdded += (token) => callback(token.ToObject<T>());
+            observable.Start();
+            return new Subscription(observable);
+        }
+
+        internal static Subscription ListenChildChanged<T>(UrlBuilder urlBuilder, Func<Task<string>> idTokenFactory, Action<T> callback)
+        {
+            var observable = Create(urlBuilder, idTokenFactory);
+            observable.ChildChanged += (token) => callback(token.ToObject<T>());
+            observable.Start();
+            return new Subscription(observable);
+        }
+
+        internal static Subscription ListenChildRemoved<T>(UrlBuilder urlBuilder, Func<Task<string>> idTokenFactory, Action<T> callback)
+        {
+            var observable = Create(urlBuilder, idTokenFactory);
+            observable.ChildRemoved += (token) => callback(token.ToObject<T>());
+            observable.Start();
+            return new Subscription(observable);
+        }
+
+        internal static Subscription ListenValue<T>(UrlBuilder urlBuilder, Func<Task<string>> idTokenFactory, Action<T> callback)
+        {
+            var observable = Create(urlBuilder, idTokenFactory);
+            observable.ValueChanged += (token) => callback(token.ToObject<T>());
+            observable.Start();
+            return new Subscription(observable);
+        }
+
+        private void Start()
+        {
+            CancellationToken = CancellationTokenSource.Token;
+            Task.Run(ListenToServerEvents, CancellationToken);
+        }
+
+        internal void Stop()
+        {
+            CancellationTokenSource.Cancel();
         }
 
         private async Task ListenToServerEvents()
         {
             UrlBuilder.AppendToPath(Endpoints.Json);
 
-            while (true)
+            while (!CancellationToken.IsCancellationRequested)
             {
                 var urlBuilderCopy = UrlBuilder.Copy();
                 urlBuilderCopy.AddParam(Params.Auth, await IdTokenFactory());
@@ -78,7 +110,7 @@ namespace Slofth.Firebase.Database
                 using (Stream stream = await response.Content.ReadAsStreamAsync())
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    while (true)
+                    while (!CancellationToken.IsCancellationRequested)
                     {
                         var serializedEventType = await reader.ReadLineAsync();
                         if (String.IsNullOrWhiteSpace(serializedEventType)) continue;
@@ -94,9 +126,11 @@ namespace Slofth.Firebase.Database
                     }
                 }
             }
+
+            // We clear all the events
+            ValueChanged = ChildAdded = ChildChanged = ChildRemoved = null;
         }
 
-        // Todo : Add comments to this function
         private void UpdateCache(ServerEvent serverEvent)
         {
             var token = Cache.SelectToken(serverEvent.Path, false);
@@ -108,30 +142,31 @@ namespace Slofth.Firebase.Database
             {
                 if (token == null)
                 {
-                    Cache[serverEvent.Path] = serverEvent.Data as JToken;
-                    ChildAdded?.Invoke(Cache.ToObject<T>());
+                    Cache[serverEvent.Path] = serverEvent.Data as JObject;
+                    ChildAdded?.Invoke(Cache[serverEvent.Path]);
                 }
                 else
                 {
                     if (token.Parent?.Parent == token.Root)
                     {
+                        var removedChild = Cache.SelectToken(serverEvent.Path, false);
                         Cache.SelectToken(serverEvent.Path, false)?.Parent?.Remove();
-                        ChildRemoved?.Invoke(Cache.ToObject<T>());
+                        ChildRemoved?.Invoke(removedChild);
                     }
                     else
                     {
                         token.Replace(serverEvent.Data as JToken);
-                        ChildChanged?.Invoke(Cache.ToObject<T>());
+                        ChildChanged?.Invoke(Cache.SelectToken(serverEvent.ChildKey, false));
                     }
                 }
             }
 
-            ValueChanged?.Invoke(Cache.ToObject<T>());
+            ValueChanged?.Invoke(Cache);
         }
 
         class Constants
         {
-            // TODO : Arbitrarily long timeout; we don't want the connection. 
+            // Arbitrarily long timeout; we don't want the connection to stop. 
             public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5200);
         }
 

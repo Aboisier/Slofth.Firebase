@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
-
-
+using Newtonsoft.Json.Linq;
+using System;
 
 namespace PolyPaint.Tests.Services
 {
@@ -285,21 +285,21 @@ namespace PolyPaint.Tests.Services
             bool wasValueChangedCalled = false;
             bool wasChildAddedCalled = false;
 
-            DatabaseEventHandler<PeopleMap> onChildAdded = (PeopleMap people) =>
+            Action<Person> onChildAdded = (Person person) =>
             {
                 wasChildAddedCalled = true;
-                Assert.AreEqual(9, people.Count);
+                Assert.AreEqual(person.Name, "Testy Testerson");
                 semaphore.Release();
             };
 
-            DatabaseEventHandler<PeopleMap> onValueChanged = (PeopleMap people) =>
+            Action<PeopleMap> onValueChanged = (PeopleMap peopleMap) =>
             {
                 wasValueChangedCalled = true;
                 semaphore.Release();
             };
 
-            Database.Ref("People").On<PeopleMap>().ValueChanged += onValueChanged;
-            Database.Ref("People").On<PeopleMap>().ChildAdded += onChildAdded;
+            var valueSub = Database.Ref("People").OnValue(onValueChanged);
+            var childAddedSub = Database.Ref("People").OnChildAdded(onChildAdded);
 
             // Act
             await Database.Ref("People").Child("ttesterson").Set(new Person("Testy Testerson", 43, "Testing."));
@@ -311,8 +311,8 @@ namespace PolyPaint.Tests.Services
             Assert.IsTrue(wasChildAddedCalled);
 
             // Teardown
-            Database.Ref("People").On<PeopleMap>().ValueChanged -= onValueChanged;
-            Database.Ref("People").On<PeopleMap>().ChildAdded -= onChildAdded;
+            valueSub.Stop();
+            childAddedSub.Stop();
         }
 
         [Test, Timeout(5000)]
@@ -322,14 +322,14 @@ namespace PolyPaint.Tests.Services
             Semaphore semaphore = new Semaphore(0, 1);
             bool wasCalled = false;
 
-            DatabaseEventHandler<PeopleMap> onChildChanged = (PeopleMap people) =>
-            {
-                Assert.AreEqual(20, people["dvader"].Age);
-                wasCalled = true;
-                semaphore.Release();
-            };
+            Action<Person> onChildChanged = (Person person) =>
+           {
+               Assert.AreEqual(20, person.Age);
+               wasCalled = true;
+               semaphore.Release();
+           };
 
-            Database.Ref("People").On<PeopleMap>().ChildChanged += onChildChanged;
+            var sub = Database.Ref("People").OnChildChanged(onChildChanged);
 
             // Act
             await Database.Ref("People").Child("dvader").Child("Age").Set(20);
@@ -339,7 +339,7 @@ namespace PolyPaint.Tests.Services
             Assert.IsTrue(wasCalled);
 
             // Teardown 
-            Database.Ref("People").On<PeopleMap>().ChildChanged -= onChildChanged;
+            sub.Stop();
         }
 
         [Test, Timeout(5000)]
@@ -348,14 +348,14 @@ namespace PolyPaint.Tests.Services
             // Arrange
             Semaphore semaphore = new Semaphore(0, 1);
             bool wasChildRemovedCalled = false;
-            DatabaseEventHandler<PeopleMap> onChildRemoved = (PeopleMap people) =>
+            Action<Person> onChildRemoved = (Person person) =>
             {
-                Assert.AreEqual(7, people.Count);
+                Assert.AreEqual(person.Name, "Darth Vader");
                 wasChildRemovedCalled = true;
                 semaphore.Release();
             };
 
-            Database.Ref("People").On<PeopleMap>().ChildRemoved += onChildRemoved;
+            var sub = Database.Ref("People").OnChildRemoved(onChildRemoved);
 
             // Act
             await Database.Ref("People").Child("dvader").Remove();
@@ -365,18 +365,7 @@ namespace PolyPaint.Tests.Services
             Assert.IsTrue(wasChildRemovedCalled);
 
             // Teardown
-            Database.Ref("People").On<PeopleMap>().ChildRemoved -= onChildRemoved;
-        }
-
-        [Test, Timeout(5000)]
-        public void Subscription_TwoOnSamePath_ShouldBeSameReference()
-        {
-            // Act
-            var ref1 = Database.Ref("People").On<PeopleMap>();
-            var ref2 = Database.Ref("People").On<PeopleMap>();
-
-            // Assert
-            Assert.AreEqual(ref1, ref2);
+            sub.Stop();
         }
 
         [Test]
