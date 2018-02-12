@@ -277,41 +277,49 @@ namespace PolyPaint.Tests.Services
             Assert.That(async () => await UnauthenticatedDatabase.Ref("People").Once<PeopleMap>(), Throws.Exception.InstanceOf<CouldNotParseAuthTokenException>());
         }
 
+        [Test, Timeout(10000)]
+        public void Subscription_ChildAdded_ShouldBeCalledOncePerChild()
+        {
+            // Arrange
+            Semaphore semaphore = new Semaphore(0, 8);
+
+            Action<Person> onChildAdded = (Person person) =>
+            {
+                semaphore.Release();
+            };
+
+            var childAddedSub = Database.Ref("People").OnChildAdded(onChildAdded);
+
+            // Assert
+            WaitFor(8, semaphore);
+
+            // Teardown
+            childAddedSub.Stop();
+        }
+
         [Test, Timeout(5000)]
         public async Task Subscription_ChildAdded_ShouldCallEvent()
         {
             // Arrange
-            Semaphore semaphore = new Semaphore(0, 2);
-            bool wasValueChangedCalled = false;
+            Semaphore semaphore = new Semaphore(0, 9);
             bool wasChildAddedCalled = false;
 
             Action<Person> onChildAdded = (Person person) =>
             {
-                wasChildAddedCalled = true;
-                Assert.AreEqual(person.Name, "Testy Testerson");
+                if (person.Name == "Testy Testerson") { wasChildAddedCalled = true; }
                 semaphore.Release();
             };
 
-            Action<PeopleMap> onValueChanged = (PeopleMap peopleMap) =>
-            {
-                wasValueChangedCalled = true;
-                semaphore.Release();
-            };
-
-            var valueSub = Database.Ref("People").OnValue(onValueChanged);
             var childAddedSub = Database.Ref("People").OnChildAdded(onChildAdded);
 
             // Act
             await Database.Ref("People").Child("ttesterson").Set(new Person("Testy Testerson", 43, "Testing."));
 
             // Assert
-            semaphore.WaitOne();
-            semaphore.WaitOne();
-            Assert.IsTrue(wasValueChangedCalled);
+            WaitFor(9, semaphore);
             Assert.IsTrue(wasChildAddedCalled);
 
             // Teardown
-            valueSub.Stop();
             childAddedSub.Stop();
         }
 
@@ -323,11 +331,10 @@ namespace PolyPaint.Tests.Services
             bool wasCalled = false;
 
             Action<Person> onChildChanged = (Person person) =>
-           {
-               Assert.AreEqual(20, person.Age);
-               wasCalled = true;
-               semaphore.Release();
-           };
+            {
+                if (person.Age == 20) { wasCalled = true; }
+                semaphore.Release();
+            };
 
             var sub = Database.Ref("People").OnChildChanged(onChildChanged);
 
@@ -342,12 +349,13 @@ namespace PolyPaint.Tests.Services
             sub.Stop();
         }
 
-        [Test, Timeout(5000)]
+        [Test, Timeout(6000)]
         public async Task Subscription_ChildRemoved_ShouldCallEvent()
         {
             // Arrange
             Semaphore semaphore = new Semaphore(0, 1);
             bool wasChildRemovedCalled = false;
+
             Action<Person> onChildRemoved = (Person person) =>
             {
                 Assert.AreEqual(person.Name, "Darth Vader");
@@ -358,6 +366,7 @@ namespace PolyPaint.Tests.Services
             var sub = Database.Ref("People").OnChildRemoved(onChildRemoved);
 
             // Act
+            Thread.Sleep(500);
             await Database.Ref("People").Child("dvader").Remove();
 
             // Assert
@@ -396,6 +405,14 @@ namespace PolyPaint.Tests.Services
             Assert.AreEqual("Hey", list[1]);
             Assert.AreEqual("Bonjourno", list[2]);
             Assert.AreEqual("Hola", list[3]);
+        }
+
+        private void WaitFor(int n, Semaphore semaphore)
+        {
+            for (var i = 0; i < n; ++i)
+            {
+                semaphore.WaitOne();
+            }
         }
     }
 }

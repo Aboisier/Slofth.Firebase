@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Slofth.Firebase.Http;
 using Slofth.Firebase.Utils;
-using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 
 namespace Slofth.Firebase.Database
@@ -136,6 +136,12 @@ namespace Slofth.Firebase.Database
             var token = Cache.SelectToken(serverEvent.Path, false);
             if (token != null && token.Parent == null)
             {
+                var newChildren = serverEvent.Data.Children().Except(Cache.Children());
+                foreach (var child in newChildren) { ChildAdded?.Invoke(child.First); }
+
+                var removedChildren = Cache.Children().Except(serverEvent.Data.Children());
+                foreach (var child in removedChildren) { ChildRemoved?.Invoke(child.First); }
+
                 Cache = serverEvent.Data as JObject ?? new JObject();
             }
             else
