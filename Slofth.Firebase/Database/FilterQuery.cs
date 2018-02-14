@@ -40,15 +40,10 @@ namespace Slofth.Firebase.Database
             return new FilterQuery(UrlBuilder.AddParam(Params.EndAt, value), Key, IdTokenFactory);
         }
 
-
         public FilterQuery EqualTo(string value)
         {
             return new FilterQuery(UrlBuilder.AddParam(Params.EqualTo, Quote(value)), Key, IdTokenFactory);
         }
-
-        //public override Task<T> Once<T>()
-        //{
-        //}
 
         class Params
         {
