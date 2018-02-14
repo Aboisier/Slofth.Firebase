@@ -277,7 +277,7 @@ namespace PolyPaint.Tests.Services
             Assert.That(async () => await UnauthenticatedDatabase.Ref("People").Once<PeopleMap>(), Throws.Exception.InstanceOf<CouldNotParseAuthTokenException>());
         }
 
-        [Test, Timeout(10000)]
+        [Test, Timeout(6000)]
         public void Subscription_ChildAdded_ShouldBeCalledOncePerChild()
         {
             // Arrange
