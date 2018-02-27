@@ -30,7 +30,7 @@ namespace Slofth.Firebase.Database
         private event DatabaseEventHandler ChildChanged;
         private event DatabaseEventHandler ChildRemoved;
 
-        private JContainer Cache { get; set; }
+        private JObject Cache { get; set; }
 
         private Func<Task<string>> IdTokenFactory { get; set; }
         private UrlBuilder UrlBuilder { get; set; }
@@ -183,7 +183,14 @@ namespace Slofth.Firebase.Database
             {
                 foreach (var key in serverEvent.Data)
                 {
-                    Cache[key.Path] = key.First;
+                    if (key.First.HasValues)
+                    {
+                        Cache[key.Path] = key.First;
+                    }
+                    else
+                    {
+                        Cache.Remove(key.Path);
+                    }
                 }
 
                 ValueChanged?.Invoke(Cache);

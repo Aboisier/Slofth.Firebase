@@ -442,6 +442,37 @@ namespace PolyPaint.Tests.Services
             valueSub.Stop();
         }
 
+        [Test, Timeout(5000)]
+        public async Task Subscription_ValuePatchNull_ShouldUpdateCache()
+        {
+            // Arrange
+            var peopleToUpdate = new PeopleMap();
+            var updatedPeople = new PeopleMap();
+            peopleToUpdate["rreddings"] = null;
+
+            Semaphore semaphore = new Semaphore(0, 2);
+
+            Action<PeopleMap> onValue = (PeopleMap people) =>
+            {
+                updatedPeople = people;
+                semaphore.Release();
+            };
+
+            var valueSub = Database.Ref("People").OnValue(onValue);
+
+            // Act
+            await Database.Ref("People").Update(peopleToUpdate);
+
+            // Assert
+            WaitFor(2, semaphore);
+            Assert.AreEqual(updatedPeople.Count, 7);
+            Assert.IsFalse(updatedPeople.ContainsKey("rreddings"));
+
+            // Teardown
+            valueSub.Stop();
+        }
+
+
         [Test]
         public async Task Once_StringArray_ShouldDeserializeIntoList()
         {
