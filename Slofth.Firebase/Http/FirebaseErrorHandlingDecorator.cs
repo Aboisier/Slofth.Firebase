@@ -6,9 +6,9 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Slofth.Firebase.Tests")]
 namespace Slofth.Firebase.Http
 {
-    class FirebaseErrorHandlingDecorator : HttpClientDecorator
+    class FirebaseErrorHandlingDecorator<TError> : HttpClientDecorator where TError : IFirebaseError, new()
     {
-        public FirebaseErrorHandlingDecorator(IHttpClientFacade baseComponent) : base(baseComponent) { }
+        public FirebaseErrorHandlingDecorator(IFirebaseHttpClientFacade baseComponent) : base(baseComponent) { }
 
         public override async Task<HttpResponseMessage> GetAsync(string url)
         {
@@ -35,8 +35,7 @@ namespace Slofth.Firebase.Http
             var response = await request();
             if (!response.IsSuccessStatusCode)
             {
-                var error = await response.Content.ReadAsAsync<Error>();
-
+                var error = await response.Content.ReadAsAsync<TError>();
                 if (error != null)
                     throw error.GetCorrespondingException();
 

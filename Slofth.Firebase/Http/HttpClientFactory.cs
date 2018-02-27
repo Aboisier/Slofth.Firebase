@@ -1,11 +1,23 @@
-﻿namespace Slofth.Firebase.Http
+﻿using System;
+
+namespace Slofth.Firebase.Http
 {
-    class HttpClientFactory
+    class FirebaseHttpClientFactory
     {
-        public static IHttpClientFacade Create()
+        public static IFirebaseHttpClientFacade CreateFirebaseAuthHttpClient()
         {
-            IHttpClientFacade client = new HttpClientFacade();
-            client = new FirebaseErrorHandlingDecorator(client);
+            return CreateErrorHandlerHttpClient<FirebaseAuthError>();
+        }
+
+        public static IFirebaseHttpClientFacade CreateFirebaseDatabaseHttpClient()
+        {
+            return CreateErrorHandlerHttpClient<FirebaseDatabaseError>();
+        }
+
+        private static IFirebaseHttpClientFacade CreateErrorHandlerHttpClient<TError>() where TError : IFirebaseError, new()
+        {
+            IFirebaseHttpClientFacade client = new HttpClientFacade();
+            client = new FirebaseErrorHandlingDecorator<TError>(client);
             return client;
         }
     }
