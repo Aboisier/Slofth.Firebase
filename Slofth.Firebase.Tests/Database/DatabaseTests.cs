@@ -183,6 +183,24 @@ namespace PolyPaint.Tests.Services
         }
 
         [Test]
+        public async Task Update_ShouldUpdateValue()
+        {
+            // Arrange
+            var people = new PeopleMap();
+            people["rreddings"] = new Person("Joey Tribbiani", 31, "How you doin'?");
+
+            // Act
+            await Database.Ref("People").Update(people);
+
+            // Assert
+            var actual = await Database.Ref("People")
+                                       .Once<PeopleMap>();
+
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(actual.Count, 8);
+        }
+
+        [Test]
         public async Task OrderByAgeLimitToFirst_People_ShouldReturnFirstTwoPeople()
         {
             // Act
@@ -295,7 +313,7 @@ namespace PolyPaint.Tests.Services
         }
 
         [Test, Timeout(6000)]
-        public void Subscription_ChildAdded_ShouldBeCalledOncePerChild()
+        public void Subscription_ChildAdded_ShouldBeCalledOncePerChildOnStart()
         {
             // Arrange
             Semaphore semaphore = new Semaphore(0, 8);
@@ -392,6 +410,36 @@ namespace PolyPaint.Tests.Services
 
             // Teardown
             sub.Stop();
+        }
+
+        [Test, Timeout(5000)]
+        public async Task Subscription_ValuePatch_ShouldUpdateCache()
+        {
+            // Arrange
+            var peopleToUpdate = new PeopleMap();
+            var updatedPeople = new PeopleMap();
+            peopleToUpdate["rreddings"] = new Person("Joey Tribbiani", 31, "How you doin'?");
+
+            Semaphore semaphore = new Semaphore(0, 2);
+
+            Action<PeopleMap> onValue = (PeopleMap people) =>
+            {
+                updatedPeople = people;
+                semaphore.Release();
+            };
+
+            var valueSub = Database.Ref("People").OnValue(onValue);
+
+            // Act
+            await Database.Ref("People").Update(peopleToUpdate);
+
+            // Assert
+            WaitFor(2, semaphore);
+            Assert.AreEqual(updatedPeople["rreddings"].ToJson(), peopleToUpdate["rreddings"].ToJson());
+            Assert.AreEqual(updatedPeople.Count, 8);
+
+            // Teardown
+            valueSub.Stop();
         }
 
         [Test]
