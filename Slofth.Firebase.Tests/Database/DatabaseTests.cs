@@ -37,6 +37,22 @@ namespace PolyPaint.Tests.Services
         }
 
         [Test]
+        public async Task Child_ShouldUpdateKey()
+        {
+            // Act
+            var childA = Database.Ref("A");
+            var childB = childA.Child("B");
+            var childC = childA.Child("C");
+            var push = await childA.Push();
+
+            // Assert
+            Assert.AreEqual(childA.Key, "A");
+            Assert.AreEqual(childB.Key, "B");
+            Assert.AreEqual(childC.Key, "C");
+            Assert.NotNull(push.Key);
+        }
+
+        [Test]
         public async Task GetPeople_DataExists_ShouldRetreiveDictionary()
         {
             // Arrange
@@ -156,6 +172,7 @@ namespace PolyPaint.Tests.Services
                                        .Push();
 
             // Assert
+            Assert.IsNotEmpty(newRef.Key);
             await newRef.Set(expected);
 
             var actual = await Database.Ref("People")
