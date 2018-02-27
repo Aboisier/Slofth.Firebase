@@ -2,10 +2,11 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Slofth.Firebase.Extensions;
 
 namespace Slofth.Firebase.Http
 {
-    class HttpClientFacade : IFirebaseHttpClientFacade
+    internal class HttpClientFacade : IFirebaseHttpClientFacade
     {
         private HttpClient Client { get; set; }
 
@@ -23,17 +24,9 @@ namespace Slofth.Firebase.Http
             Client = new HttpClient(httpClientHandler, true);
         }
 
-        public HttpClientFacade(Uri baseAddress)
+        ~HttpClientFacade()
         {
-            HttpClientHandler httpClientHandler = new HttpClientHandler();
-            httpClientHandler.AllowAutoRedirect = true;
-            Client = new HttpClient(httpClientHandler, true);
-            Client.BaseAddress = baseAddress;
-        }
-
-        public HttpClientFacade(HttpClient client)
-        {
-            Client = client;
+            Client.Dispose();
         }
 
         public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, HttpCompletionOption completionOption)
