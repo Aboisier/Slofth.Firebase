@@ -51,6 +51,11 @@ namespace Slofth.Firebase.Http
             return await Client.PutAsJsonAsync(url, value);
         }
 
+        public async Task<HttpResponseMessage> PatchAsJsonAsync<T>(string url, T value)
+        {
+            return await Client.PatchAsJsonAsync(url, value);
+        }
+
         public async Task<HttpResponseMessage> GetAsync(string url)
         {
             return await Client.GetAsync(url);

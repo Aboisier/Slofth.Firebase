@@ -25,6 +25,11 @@ namespace Slofth.Firebase.Http
             return await ExecuteHandledRequest(async () => await BaseComponent.PutAsJsonAsync(url, value));
         }
 
+        public override async Task<HttpResponseMessage> PatchAsJsonAsync<T>(string url, T value)
+        {
+            return await ExecuteHandledRequest(async () => await BaseComponent.PatchAsJsonAsync(url, value));
+        }
+
         public override async Task<HttpResponseMessage> DeleteAsync(string url)
         {
             return await ExecuteHandledRequest(async () => await BaseComponent.DeleteAsync(url));
