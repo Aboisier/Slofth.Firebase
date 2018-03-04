@@ -86,10 +86,13 @@
     <Content Include="TestData\Rules\DenyEverything.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestData\Database\Array.json">
+    <Content Include="TestData\Database\StringArray.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />
+    <Content Include="TestData\Database\NumberArray.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Slofth.Firebase\Slofth.Firebase.csproj">

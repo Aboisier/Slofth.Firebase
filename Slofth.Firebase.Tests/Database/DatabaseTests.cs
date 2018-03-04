@@ -472,12 +472,11 @@ namespace PolyPaint.Tests.Services
             valueSub.Stop();
         }
 
-
         [Test]
         public async Task Once_StringArray_ShouldDeserializeIntoList()
         {
             // Arrange
-            await FirebaseHelper.ImportDatabase("Array.json");
+            await FirebaseHelper.ImportDatabase("StringArray.json");
 
             // Act
             var list = await Database.Ref("Array").Once<List<string>>();
