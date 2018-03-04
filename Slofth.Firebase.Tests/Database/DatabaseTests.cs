@@ -359,6 +359,34 @@ namespace PolyPaint.Tests.Services
         }
 
         [Test, Timeout(5000)]
+        public async Task Subscription_PrimitiveChildAdded_ShouldDeserializePrimitiveObject()
+        {
+            // Arrange
+            await FirebaseHelper.ImportDatabase("NumberArray.json");
+
+            Semaphore semaphore = new Semaphore(0, 7);
+            bool wasNumberProperlyDeserialized = false;
+
+            Action<int> onChildAdded = (int number) =>
+            {
+                if (number == 6) { wasNumberProperlyDeserialized = true; }
+                semaphore.Release();
+            };
+
+            var childAddedSub = Database.Ref("Array").OnChildAdded(onChildAdded);
+
+            // Act
+            await Database.Ref("Array").Child("6").Set(6);
+
+            // Assert
+            WaitFor(7, semaphore);
+            Assert.IsTrue(wasNumberProperlyDeserialized);
+
+            // Teardown
+            childAddedSub.Stop();
+        }
+
+        [Test, Timeout(5000)]
         public async Task Subscription_ChildChanged_ShouldCallEvent()
         {
             // Arrange

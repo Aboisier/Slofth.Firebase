@@ -138,12 +138,14 @@ namespace Slofth.Firebase.Database
         {
             lock (CacheLock)
             {
-
                 var token = Cache.SelectToken(serverEvent.Path, false);
                 if (token != null && token.Parent == null)
                 {
                     var newChildren = serverEvent.Data.Children().Except(Cache.Children());
-                    foreach (var child in newChildren) { ChildAdded?.Invoke(child.First); }
+                    foreach (var child in newChildren)
+                    {
+                        ChildAdded?.Invoke(child.GetType() == typeof(JValue) ? child : child.First);
+                    }
 
                     var removedChildren = Cache.Children().Except(serverEvent.Data.Children());
                     foreach (var child in removedChildren) { ChildRemoved?.Invoke(child.First); }
@@ -154,7 +156,7 @@ namespace Slofth.Firebase.Database
                 {
                     if (token == null)
                     {
-                        Cache[serverEvent.Path] = serverEvent.Data as JObject;
+                        Cache[serverEvent.Path] = serverEvent.Data as JToken;
                         ChildAdded?.Invoke(Cache[serverEvent.Path]);
                     }
                     else
