@@ -24,19 +24,19 @@ namespace Slofth.Firebase.Database
 
             var type = ToDatabaseEvent(serializedEvent);
 
-            PathDataPair content = JsonConvert.DeserializeObject<PathDataPair>(serializedData.Split(new char[] { ':' }, 2)[1]);
-            if (content == null)
-            {
-                return new ServerEvent(type, null, null);
-            }
-            else
+            if (type == ServerEventType.Put || type == ServerEventType.Patch)
             {
                 // The data part looks like this: data: { path: "path/to/resource", data: {data: 2, otherData: "helo" }}
 
                 // We need to separate the keys with dots instead of slashes.
                 // The data is a json object. It is null if we deal with a remove operation.
+                PathDataPair content = JsonConvert.DeserializeObject<PathDataPair>(serializedData.Split(new char[] { ':' }, 2)[1]);
 
-                return new ServerEvent(type, content.Path, content.Data);
+                return new ServerEvent(type, content?.Path, content?.Data);
+            }
+            else
+            {
+                return new ServerEvent(type, null, null);
             }
         }
 

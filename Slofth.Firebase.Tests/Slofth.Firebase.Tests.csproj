@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Database\DatabaseTests.cs" />
+    <Compile Include="Database\ServerEventTests.cs" />
     <Compile Include="Utils\UrlBuilderTests.cs" />
     <Compile Include="Http\FirebaseAuthErrorTests.cs" />
     <Compile Include="Http\FirebaseErrorHandlingDecoratorTests.cs" />
