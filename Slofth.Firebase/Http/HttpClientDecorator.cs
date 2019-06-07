@@ -24,11 +24,13 @@ namespace Slofth.Firebase.Http
         public abstract Task<HttpResponseMessage> GetAsync(string url);
         public abstract Task<HttpResponseMessage> PostAsJsonAsync<T>(string url, T value);
         public abstract Task<HttpResponseMessage> PutAsJsonAsync<T>(string url, T value);
+        public abstract Task<HttpResponseMessage> PatchAsJsonAsync<T>(string url, T value);
         public abstract Task<HttpResponseMessage> DeleteAsync(string url);
-
+        
         public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, HttpCompletionOption completionOption)
         {
             return await BaseComponent.SendAsync(request, completionOption);
         }
+
     }
 }

@@ -37,6 +37,22 @@ namespace PolyPaint.Tests.Services
         }
 
         [Test]
+        public async Task Child_ShouldUpdateKey()
+        {
+            // Act
+            var childA = Database.Ref("A");
+            var childB = childA.Child("B");
+            var childC = childA.Child("C");
+            var push = await childA.Push();
+
+            // Assert
+            Assert.AreEqual(childA.Key, "A");
+            Assert.AreEqual(childB.Key, "B");
+            Assert.AreEqual(childC.Key, "C");
+            Assert.NotNull(push.Key);
+        }
+
+        [Test]
         public async Task GetPeople_DataExists_ShouldRetreiveDictionary()
         {
             // Arrange
@@ -156,6 +172,7 @@ namespace PolyPaint.Tests.Services
                                        .Push();
 
             // Assert
+            Assert.IsNotEmpty(newRef.Key);
             await newRef.Set(expected);
 
             var actual = await Database.Ref("People")
@@ -163,6 +180,24 @@ namespace PolyPaint.Tests.Services
                                        .Once<Person>();
 
             Assert.AreEqual(expected.ToJson(), actual.ToJson());
+        }
+
+        [Test]
+        public async Task Update_ShouldUpdateValue()
+        {
+            // Arrange
+            var people = new PeopleMap();
+            people["rreddings"] = new Person("Joey Tribbiani", 31, "How you doin'?");
+
+            // Act
+            await Database.Ref("People").Update(people);
+
+            // Assert
+            var actual = await Database.Ref("People")
+                                       .Once<PeopleMap>();
+
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(actual.Count, 8);
         }
 
         [Test]
@@ -278,7 +313,7 @@ namespace PolyPaint.Tests.Services
         }
 
         [Test, Timeout(6000)]
-        public void Subscription_ChildAdded_ShouldBeCalledOncePerChild()
+        public void Subscription_ChildAdded_ShouldBeCalledOncePerChildOnStart()
         {
             // Arrange
             Semaphore semaphore = new Semaphore(0, 8);
@@ -318,6 +353,34 @@ namespace PolyPaint.Tests.Services
             // Assert
             WaitFor(9, semaphore);
             Assert.IsTrue(wasChildAddedCalled);
+
+            // Teardown
+            childAddedSub.Stop();
+        }
+
+        [Test, Timeout(5000)]
+        public async Task Subscription_PrimitiveChildAdded_ShouldDeserializePrimitiveObject()
+        {
+            // Arrange
+            await FirebaseHelper.ImportDatabase("NumberArray.json");
+
+            Semaphore semaphore = new Semaphore(0, 7);
+            bool wasNumberProperlyDeserialized = false;
+
+            Action<int> onChildAdded = (int number) =>
+            {
+                if (number == 6) { wasNumberProperlyDeserialized = true; }
+                semaphore.Release();
+            };
+
+            var childAddedSub = Database.Ref("Array").OnChildAdded(onChildAdded);
+
+            // Act
+            await Database.Ref("Array").Child("6").Set(6);
+
+            // Assert
+            WaitFor(7, semaphore);
+            Assert.IsTrue(wasNumberProperlyDeserialized);
 
             // Teardown
             childAddedSub.Stop();
@@ -377,11 +440,71 @@ namespace PolyPaint.Tests.Services
             sub.Stop();
         }
 
+        [Test, Timeout(5000)]
+        public async Task Subscription_ValuePatch_ShouldUpdateCache()
+        {
+            // Arrange
+            var peopleToUpdate = new PeopleMap();
+            var updatedPeople = new PeopleMap();
+            peopleToUpdate["rreddings"] = new Person("Joey Tribbiani", 31, "How you doin'?");
+
+            Semaphore semaphore = new Semaphore(0, 2);
+
+            Action<PeopleMap> onValue = (PeopleMap people) =>
+            {
+                updatedPeople = people;
+                semaphore.Release();
+            };
+
+            var valueSub = Database.Ref("People").OnValue(onValue);
+
+            // Act
+            await Database.Ref("People").Update(peopleToUpdate);
+
+            // Assert
+            WaitFor(2, semaphore);
+            Assert.AreEqual(updatedPeople["rreddings"].ToJson(), peopleToUpdate["rreddings"].ToJson());
+            Assert.AreEqual(updatedPeople.Count, 8);
+
+            // Teardown
+            valueSub.Stop();
+        }
+
+        [Test, Timeout(5000)]
+        public async Task Subscription_ValuePatchNull_ShouldUpdateCache()
+        {
+            // Arrange
+            var peopleToUpdate = new PeopleMap();
+            var updatedPeople = new PeopleMap();
+            peopleToUpdate["rreddings"] = null;
+
+            Semaphore semaphore = new Semaphore(0, 2);
+
+            Action<PeopleMap> onValue = (PeopleMap people) =>
+            {
+                updatedPeople = people;
+                semaphore.Release();
+            };
+
+            var valueSub = Database.Ref("People").OnValue(onValue);
+
+            // Act
+            await Database.Ref("People").Update(peopleToUpdate);
+
+            // Assert
+            WaitFor(2, semaphore);
+            Assert.AreEqual(updatedPeople.Count, 7);
+            Assert.IsFalse(updatedPeople.ContainsKey("rreddings"));
+
+            // Teardown
+            valueSub.Stop();
+        }
+
         [Test]
         public async Task Once_StringArray_ShouldDeserializeIntoList()
         {
             // Arrange
-            await FirebaseHelper.ImportDatabase("Array.json");
+            await FirebaseHelper.ImportDatabase("StringArray.json");
 
             // Act
             var list = await Database.Ref("Array").Once<List<string>>();

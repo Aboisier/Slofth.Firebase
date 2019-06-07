@@ -71,6 +71,12 @@ namespace Slofth.Firebase.Database
             var response = await Client.PutAsJsonAsync(UrlBuilder.Url, value);
         }
 
+        public async Task Update<T>(T value)
+        {
+            UrlBuilder.AppendToPath(Endpoints.Json).AddParam(Params.Auth, await IdTokenFactory());
+            var response = await Client.PatchAsJsonAsync(UrlBuilder.Url, value);
+        }
+
         public ChildQuery Child(string name)
         {
             return new ChildQuery(UrlBuilder.AppendToPath(name), name, IdTokenFactory);

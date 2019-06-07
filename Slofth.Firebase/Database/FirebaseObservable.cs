@@ -30,11 +30,13 @@ namespace Slofth.Firebase.Database
         private event DatabaseEventHandler ChildChanged;
         private event DatabaseEventHandler ChildRemoved;
 
-        private JContainer Cache { get; set; }
+        private JObject Cache { get; set; }
 
         private Func<Task<string>> IdTokenFactory { get; set; }
         private UrlBuilder UrlBuilder { get; set; }
         private IFirebaseHttpClientFacade Client { get; set; }
+
+        private object CacheLock { get; set; } = new object();
 
         private static FirebaseObservable Create(UrlBuilder urlBuilder, Func<Task<string>> idTokenFactory)
         {
@@ -122,7 +124,8 @@ namespace Slofth.Firebase.Database
                         if (serverEvent.Type == ServerEventType.KeepAlive) { continue; }
                         if (serverEvent.Type == ServerEventType.Cancel) { throw new PremissionDeniedException(); }
 
-                        UpdateCache(serverEvent);
+                        if (serverEvent.Type == ServerEventType.Put) { HandlePut(serverEvent); }
+                        else if (serverEvent.Type == ServerEventType.Patch) { HandlePatch(serverEvent); }
                     }
                 }
             }
@@ -131,43 +134,69 @@ namespace Slofth.Firebase.Database
             ValueChanged = ChildAdded = ChildChanged = ChildRemoved = null;
         }
 
-        private void UpdateCache(ServerEvent serverEvent)
+        private void HandlePut(ServerEvent serverEvent)
         {
-            var token = Cache.SelectToken(serverEvent.Path, false);
-            if (token != null && token.Parent == null)
+            lock (CacheLock)
             {
-                var newChildren = serverEvent.Data.Children().Except(Cache.Children());
-                foreach (var child in newChildren) { ChildAdded?.Invoke(child.First); }
-
-                var removedChildren = Cache.Children().Except(serverEvent.Data.Children());
-                foreach (var child in removedChildren) { ChildRemoved?.Invoke(child.First); }
-
-                Cache = serverEvent.Data as JObject ?? new JObject();
-            }
-            else
-            {
-                if (token == null)
+                var token = Cache.SelectToken(serverEvent.Path, false);
+                if (token != null && token.Parent == null)
                 {
-                    Cache[serverEvent.Path] = serverEvent.Data as JObject;
-                    ChildAdded?.Invoke(Cache[serverEvent.Path]);
+                    var newChildren = serverEvent.Data.Children().Except(Cache.Children());
+                    foreach (var child in newChildren)
+                    {
+                        ChildAdded?.Invoke(child.GetType() == typeof(JValue) ? child : child.First);
+                    }
+
+                    var removedChildren = Cache.Children().Except(serverEvent.Data.Children());
+                    foreach (var child in removedChildren) { ChildRemoved?.Invoke(child.First); }
+
+                    Cache = serverEvent.Data as JObject ?? new JObject();
                 }
                 else
                 {
-                    if (token.Parent?.Parent == token.Root)
+                    if (token == null)
                     {
-                        var removedChild = Cache.SelectToken(serverEvent.Path, false);
-                        Cache.SelectToken(serverEvent.Path, false)?.Parent?.Remove();
-                        ChildRemoved?.Invoke(removedChild);
+                        Cache[serverEvent.Path] = serverEvent.Data as JToken;
+                        ChildAdded?.Invoke(Cache[serverEvent.Path]);
                     }
                     else
                     {
-                        token.Replace(serverEvent.Data as JToken);
-                        ChildChanged?.Invoke(Cache.SelectToken(serverEvent.ChildKey, false));
+                        if (token.Parent?.Parent == token.Root)
+                        {
+                            var removedChild = Cache.SelectToken(serverEvent.Path, false);
+                            Cache.SelectToken(serverEvent.Path, false)?.Parent?.Remove();
+                            ChildRemoved?.Invoke(removedChild);
+                        }
+                        else
+                        {
+                            token.Replace(serverEvent.Data as JToken);
+                            ChildChanged?.Invoke(Cache.SelectToken(serverEvent.ChildKey, false));
+                        }
                     }
                 }
-            }
 
-            ValueChanged?.Invoke(Cache);
+                ValueChanged?.Invoke(Cache);
+            }
+        }
+
+        private void HandlePatch(ServerEvent serverEvent)
+        {
+            lock (CacheLock)
+            {
+                foreach (var key in serverEvent.Data)
+                {
+                    if (key.First.HasValues)
+                    {
+                        Cache[key.Path] = key.First;
+                    }
+                    else
+                    {
+                        Cache.Remove(key.Path);
+                    }
+                }
+
+                ValueChanged?.Invoke(Cache);
+            }
         }
 
         class Constants
